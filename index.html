@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlayBox — игровой портал</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="fxc"></canvas>
+
+<!-- ВХОД -->
+<section id="auth">
+  <div class="auth-box">
+    <div class="logo">Play<span>Box</span></div>
+    <p class="sub">Игры, рекорды и свой профиль</p>
+    <div class="tabs">
+      <button id="tLogin" class="on">Вход</button>
+      <button id="tReg">Регистрация</button>
+    </div>
+    <label class="field">Логин<input id="u" autocomplete="username" maxlength="16"></label>
+    <label class="field">Пароль<input id="p" type="password" autocomplete="current-password"></label>
+    <label class="field hidden" id="p2w">Повторите пароль<input id="p2" type="password"></label>
+    <div class="err" id="err"></div>
+    <button class="btn" id="go">Войти</button>
+    <p class="note">Аккаунты хранятся только в браузере этого компьютера</p>
+  </div>
+</section>
+
+<!-- САЙТ -->
+<div id="app" class="hidden">
+  <header>
+    <div class="logo">Play<span>Box</span></div>
+    <nav>
+      <button data-v="catalog" class="on">Каталог</button>
+      <button data-v="shop">Магазин</button>
+      <button data-v="profile">Профиль</button>
+    </nav>
+    <div class="coins" id="hCoins">🪙 1000</div>
+    <div class="me"><div class="ava" id="hAva"></div><span id="hName"></span></div>
+    <button class="btn ghost" id="out">Выйти</button>
+  </header>
+
+  <main>
+    <section id="catalog">
+      <h2>Игры</h2>
+      <div class="grid">
+        <button class="game" id="openMine"><div class="art" style="--a:#3b82f6;--b:#1e1b4b">💣</div><div class="info"><h3>Сапёр</h3><p>Найди все мины и получи монеты</p></div></button>
+        <button class="game" id="openInv"><div class="art" style="--a:#a855f7;--b:#0e7490">🔮</div><div class="info"><h3>Инвокер</h3><p>20 секунд на комбинации сфер</p></div></button>
+        <button class="game" id="openSud"><div class="art" style="--a:#10b981;--b:#064e3b">🔢</div><div class="info"><h3>Судоку</h3><p>Классическая головоломка 9×9</p></div></button>
+      </div>
+      <h2 style="margin-top:30px">🧪 Экспериментальный</h2>
+      <div class="grid">
+        <button class="game" id="openDota"><div class="art" style="--a:#ef4444;--b:#111827">⚔️</div><div class="info"><h3>Дота 1×1</h3><p>Shadow Fiend, туман войны, варды, high ground</p></div></button>
+      </div>
+      <h2 style="margin-top:30px">Казино</h2>
+      <div class="grid">
+        <button class="game" id="openSlots"><div class="art" style="--a:#f59e0b;--b:#7f1d1d">🎰</div><div class="info"><h3>Слоты</h3><p>Три барабана, редкие джекпоты</p></div></button>
+        <button class="game" id="openChess"><div class="art" style="--a:#94a3b8;--b:#1e293b">♟️</div><div class="info"><h3>Шахматы на деньги</h3><p>Ставка против бота, 4 уровня сложности</p></div></button>
+        <button class="game" id="openBj"><div class="art" style="--a:#16a34a;--b:#052e16">🃏</div><div class="info"><h3>Блэкджек</h3><p>Набери 21 и обыграй дилера</p></div></button>
+      </div>
+    </section>
+
+    <section id="mine" class="hidden">
+      <button class="btn ghost back" id="backCat">← Каталог</button>
+      <h2>Сапёр</h2>
+      <div class="bar">
+        <select id="diff">
+          <option value="9,9,10">Новичок 9×9</option>
+          <option value="12,12,25">Любитель 12×12</option>
+          <option value="16,16,40">Эксперт 16×16</option>
+        </select>
+        <div class="stat" id="mines">💣 10</div>
+        <div class="stat" id="time">⏱ 0</div>
+        <button class="btn" id="flagMode">🚩 Флажок</button>
+        <button class="btn ghost" id="again">Заново</button>
+      </div>
+      <div id="board"></div>
+      <div class="msg" id="msg"></div>
+      <p class="hint">ПК: ЛКМ — открыть, ПКМ — флажок. Телефон: включите «Флажок» и нажимайте на клетки.</p>
+    </section>
+
+    <section id="invoker" class="hidden">
+      <button class="btn ghost back" id="backCat2">← Каталог</button>
+      <h2>Инвокер</h2>
+      <div class="bar">
+        <div class="stat" id="iTime">⏱ 20</div>
+        <div class="stat" id="iScore">✨ 0</div>
+        <button class="btn" id="iStart">Старт</button>
+        <button class="btn ghost" id="iHint">Подсказки</button>
+      </div>
+      <div class="panel inv-target"><div class="big" id="iIcon">🔮</div><div><div id="iName" class="iname">Нажмите «Старт»</div><div id="iForm" class="hint"></div></div></div>
+      <div class="orbs" id="orbs"></div>
+      <div class="keys">
+        <button class="key q" data-k="Q">Q<small>Quas</small></button>
+        <button class="key w" data-k="W">W<small>Wex</small></button>
+        <button class="key e" data-k="E">E<small>Exort</small></button>
+        <button class="key r" data-k="R">R<small>Invoke</small></button>
+      </div>
+      <div class="msg" id="iMsg"></div>
+      <p class="hint">Соберите три сферы (Q, W, E), затем нажмите R, чтобы призвать заклинание. Играть можно с клавиатуры. За 20 секунд призовите как можно больше.</p>
+      <div class="panel" id="iRef" style="margin-top:14px"></div>
+    </section>
+
+    <section id="sudoku" class="hidden">
+      <button class="btn ghost back" data-back>← Каталог</button>
+      <h2>Судоку</h2>
+      <div class="bar">
+        <select id="sdDiff"><option value="36">Легко</option><option value="46">Средне</option><option value="54">Сложно</option></select>
+        <div class="stat" id="sdTime">⏱ 0</div><div class="stat" id="sdErr">❌ 0</div>
+        <button class="btn ghost" id="sdHint">💡 Подсказка 25🪙</button>
+        <button class="btn" id="sdNew">Новая</button>
+      </div>
+      <div id="sdBoard"></div><div class="pad" id="sdPad"></div>
+      <div class="msg" id="sdMsg"></div>
+      <p class="hint">Выберите клетку и цифру (клавиатура тоже работает). За победу — монеты.</p>
+    </section>
+
+    <section id="slots" class="hidden">
+      <button class="btn ghost back" data-back>← Каталог</button>
+      <h2>Слоты</h2>
+      <div class="machine" id="machine"><div class="reels"><div class="reel" id="r0">🍒</div><div class="reel" id="r1">🍋</div><div class="reel" id="r2">🔔</div></div></div>
+      <div class="msg center" id="slMsg"></div>
+      <div class="bar center"><div class="chips" id="slChips"></div><button class="btn spin" id="spin">Крутить</button></div>
+      <div class="panel"><h3>Выплаты (ставка × множитель)</h3><div id="slPay"></div><p class="hint">Монеты игровые. Казино всегда в плюсе — играйте ради азарта.</p></div>
+    </section>
+
+    <section id="bj" class="hidden">
+      <button class="btn ghost back" data-back>← Каталог</button>
+      <h2>Блэкджек</h2>
+      <div class="table">
+        <div class="hand-l">Дилер <b id="dTot"></b></div><div class="hand" id="dHand"></div>
+        <div class="hand-l">Вы <b id="pTot"></b></div><div class="hand" id="pHand"></div>
+      </div>
+      <div class="msg center" id="bjMsg">Сделайте ставку</div>
+      <div class="bar center" id="bjBet"><div class="chips" id="bjChips"></div><button class="btn spin" id="deal">Раздать</button></div>
+      <div class="bar center hidden" id="bjAct"><button class="btn" id="hit">Взять</button><button class="btn ghost" id="stand">Хватит</button><button class="btn ghost" id="dbl">Удвоить</button></div>
+      <p class="hint center" style="text-align:center">Блэкджек платит 2.5×, победа 2×, дилер берёт до 17.</p>
+    </section>
+
+    <section id="dota" class="hidden">
+      <button class="btn ghost back" data-back>← Каталог</button>
+      <h2>Мини-Дота: Shadow Fiend</h2>
+      <div id="dView">
+        <button class="btn ghost" id="dFs">⛶ На весь экран</button>
+        <div class="dtop"><span id="dScore"></span></div>
+        <div id="dDead" class="hidden">Вы погибли…</div>
+
+        <div class="dhud">
+          <div class="hport">
+            <div class="hname">SHADOW FIEND</div>
+            <div class="hface"><svg viewBox="0 0 64 64"><defs><radialGradient id="pg" cx="50%" cy="40%"><stop offset="0" stop-color="#4a1212"/><stop offset="1" stop-color="#050203"/></radialGradient></defs><rect width="64" height="64" fill="url(#pg)"/><path d="M12 8 L22 26 L16 30 Z M52 8 L42 26 L48 30 Z" fill="#111"/><ellipse cx="32" cy="34" rx="15" ry="18" fill="#0b0b0e" stroke="#ff3b1f" stroke-width="1.5"/><path d="M21 31 L28 34 L21 36 Z M43 31 L36 34 L43 36 Z" fill="#ff4a1a"/><path d="M24 46 Q32 52 40 46" stroke="#ff3b1f" stroke-width="2" fill="none"/></svg></div>
+            <div class="hlv" id="dLv">1</div>
+            <div class="hst" id="dSt"></div>
+          </div>
+          <div class="hmid">
+            <div class="abils" id="dAbils"></div>
+            <div class="hbar hp"><i id="dHpB"></i><span id="dHpT"></span><em id="dHpR"></em></div>
+            <div class="hbar mp"><i id="dMpB"></i><span id="dMpT"></span><em id="dMpR"></em></div>
+          </div>
+          <div class="hitems">
+            <div class="islots" id="dSlots"></div>
+            <div class="hgold"><span id="dGold">🪙 0</span><button class="btn" id="dShopBtn">🛒 <b id="dShopK"></b></button></div>
+          </div>
+        </div>
+
+        <div id="dShop" class="hidden"><div class="dsg" id="dShopG"></div></div>
+        <div id="dOver" class="hidden"><div id="dOverT"></div><button class="btn" id="dAgain">В меню</button></div>
+
+        <div id="dMenu">
+          <div class="dm-in">
+            <h3>Shadow Fiend 1×1</h3>
+            <div class="dm-l">Сложность бота</div>
+            <div class="dm-diff" id="dDiff"></div>
+            <div class="dm-l">Управление <small>(нажмите на кнопку и затем на нужную клавишу)</small></div>
+            <div class="dm-keys" id="dKeys"></div>
+            <div class="dm-row"><button class="btn ghost" id="dKeyReset">Сбросить клавиши</button><button class="btn" id="dPlay">▶ Играть</button></div>
+          </div>
+        </div>
+      </div>
+      <p class="hint">ПКМ — идти / атаковать (свою пачку добивай при &lt;50% HP — deny; вражеский вард бей ПКМ, если виден). Камера двигается, когда подводишь мышь к краю экрана, Пробел — вернуть камеру на героя. Q W E — три Raze (перезарядка 4.5 с), R — Requiem с 6 уровня (каст 2.5 с, действует 2 с, чем ближе к центру, тем больнее). Z X C V B N — слоты предметов (все клавиши меняются в меню перед игрой). Eul's — выбери цель ЛКМ (можно случайно попасть по крипу). Ты видишь только круг вокруг героя, союзников и Observer; Sentry раскрывает невидимость и вражеские варды. Победа даёт монеты в зависимости от сложности.</p>
+    </section>
+
+    <section id="chess" class="hidden">
+      <button class="btn ghost back" data-back>← Каталог</button>
+      <h2>Шахматы на деньги</h2>
+      <div class="bar"><select id="chLv"><option value="1">Новичок (ходит случайно)</option><option value="2">Любитель</option><option value="3">Мастер</option><option value="4">Гроссмейстер</option></select></div>
+      <div id="chBoard"></div>
+      <div class="msg" id="chMsg">Выберите ставку и нажмите «Начать»</div>
+      <div class="bar" id="chBetBar"><div class="chips" id="chChips"></div><button class="btn spin" id="chStart">Начать партию</button></div>
+      <div class="bar hidden" id="chRes"><button class="btn ghost" id="chResign">Сдаться</button></div>
+      <p class="hint">Вы играете белыми. Победа платит 2× ставки, ничья возвращает ставку, сдача или выход — проигрыш. Рокировки и взятие на проходе не реализованы, пешка превращается в ферзя.</p>
+    </section>
+
+    <section id="shop" class="hidden">
+      <h2>Магазин тем</h2>
+      <p class="hint" style="margin:-8px 0 16px">Новые темы с анимированным фоном и эффектами. Чем дальше, тем дороже.</p>
+      <div class="grid" id="shopGrid"></div>
+    </section>
+
+    <section id="profile" class="hidden">
+      <h2>Профиль</h2>
+      <div class="panel"><h3>Аватар</h3><div class="opts" id="avas"></div></div>
+      <div class="panel"><h3>Тема оформления</h3><div class="opts" id="themes"></div></div>
+      <div class="panel"><h3>Кошелёк</h3><button class="btn" id="dole">Пособие +100 🪙</button><p class="hint">Доступно, когда на счету меньше 10 монет</p></div>
+      <div class="panel"><h3>Статистика</h3><div id="stats"></div></div>
+      <div class="panel"><h3>Рекорды</h3><div id="recs"></div></div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const DB = 'playbox_users', SES = 'playbox_session';
+const load = () => { try { return JSON.parse(localStorage.getItem(DB)) || {}; } catch { return {}; } };
+const save = d => localStorage.setItem(DB, JSON.stringify(d));
+let me = null, reg = false;
+
+async function hash(s) {
+  try {
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('pb:' + s));
+    return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+  } catch { return btoa(unescape(encodeURIComponent('pb:' + s))); }
+}
+
+/* ---------- вход / регистрация ---------- */
+function mode(r) {
+  reg = r;
+  $('tReg').classList.toggle('on', r); $('tLogin').classList.toggle('on', !r);
+  $('p2w').classList.toggle('hidden', !r);
+  $('go').textContent = r ? 'Создать аккаунт' : 'Войти';
+  $('err').textContent = '';
+}
+$('tLogin').onclick = () => mode(false);
+$('tReg').onclick = () => mode(true);
+
+$('go').onclick = async () => {
+  const u = $('u').value.trim(), p = $('p').value, d = load(), k = u.toLowerCase();
+  if (u.length < 3) return $('err').textContent = 'Логин — минимум 3 символа';
+  if (p.length < 4) return $('err').textContent = 'Пароль — минимум 4 символа';
+  const h = await hash(p);
+  if (reg) {
+    if (p !== $('p2').value) return $('err').textContent = 'Пароли не совпадают';
+    if (d[k]) return $('err').textContent = 'Такой логин уже занят';
+    d[k] = { name: u, pass: h, avatar: '😎', theme: 'default', records: {}, coins: 1000, stats: {} };
+    save(d);
+  } else if (!d[k] || d[k].pass !== h) {
+    return $('err').textContent = 'Неверный логин или пароль';
+  }
+  localStorage.setItem(SES, k);
+  start(k);
+};
+['u', 'p', 'p2'].forEach(i => $(i).addEventListener('keydown', e => e.key === 'Enter' && $('go').click()));
+
+function start(k) {
+  const d = load();
+  if (!d[k]) return;
+  me = k;
+  $('auth').classList.add('hidden'); $('app').classList.remove('hidden');
+  applyUser(); view('catalog');
+}
+$('out').onclick = () => {
+  localStorage.removeItem(SES); me = null; clearInterval(timer); stopInv(); clearInterval(sdT);
+  applyTheme('default');
+  $('app').classList.add('hidden'); $('auth').classList.remove('hidden');
+  $('p').value = ''; $('p2').value = '';
+};
+
+/* ---------- навигация ---------- */
+function view(v) {
+  if (me && v !== 'shop') applyTheme(load()[me].theme);
+  D.paused = v !== 'dota';
+  if (v === 'shop') renderShop();
+  ['catalog', 'mine', 'invoker', 'sudoku', 'slots', 'bj', 'chess', 'dota', 'shop', 'profile'].forEach(s => $(s).classList.toggle('hidden', s !== v));
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === (v === 'profile' || v === 'shop' ? v : 'catalog')));
+  if (v === 'profile') renderProfile();
+  if (v !== 'mine') clearInterval(timer);
+  if (v !== 'chess' && cOn) cFinish('lose');
+  if (v !== 'dota') { $('dView').classList.remove('fs'); if (document.fullscreenElement) document.exitFullscreen(); }
+  if (v !== 'invoker') stopInv();
+  if (v !== 'sudoku') clearInterval(sdT);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => view(b.dataset.v));
+$('openMine').onclick = () => { view('mine'); newGame(); };
+$('backCat').onclick = () => view('catalog');
+$('backCat2').onclick = () => view('catalog');
+$('openInv').onclick = () => { view('invoker'); resetInv(); };
+
+/* ---------- профиль ---------- */
+const AVAS = ['😎', '🦊', '🐼', '🐸', '🦁', '🐙', '👾', '🚀', '🐲', '🎮'];
+const THEMES = [['default', 'Неон', '#a06bff', 0], ['ocean', 'Океан', '#2ec4ff', 0], ['forest', 'Лес', '#4ade80', 0], ['sunset', 'Закат', '#ff7a45', 0], ['light', 'Светлая', '#7c3aed', 0],
+  ['sakura', 'Сакура', '#ff7eb6', 200, 'Падающие лепестки'], ['matrix', 'Матрица', '#00ff66', 400, 'Дождь из кода'], ['aurora', 'Северное сияние', '#5eead4', 700, 'Переливающиеся волны'],
+  ['lava', 'Лава', '#ff5a1f', 1000, 'Летящие искры'], ['frost', 'Мороз', '#8fe3ff', 1500, 'Снегопад'], ['cyber', 'Киберпанк', '#00f0ff', 2200, 'Неон, сканлайны, глитч'],
+  ['galaxy', 'Галактика', '#8b7bff', 3000, 'Мерцающие звёзды'], ['storm', 'Гроза', '#7fb2ff', 4000, 'Ливень и молнии'], ['gold', 'Золото', '#ffc933', 5500, 'Золотые искры и блеск'], ['void', 'Пустота', '#c026ff', 8000, 'Вихрь частиц']];
+function upd(fn) { const d = load(); fn(d[me]); save(d); applyUser(); renderProfile(); }
+function applyUser() {
+  const u = load()[me];
+  applyTheme(u.theme);
+  $('hCoins').textContent = '🪙 ' + (u.coins ?? 1000); pulse($('hCoins'), 'bump');
+  $('hAva').textContent = u.avatar; $('hName').textContent = u.name;
+}
+function renderProfile() {
+  const u = load()[me];
+  const GN = { mine: 'Сапёр', invoker: 'Инвокер', sudoku: 'Судоку', slots: 'Слоты', bj: 'Блэкджек', chess: 'Шахматы', dota: 'Мини-Дота' };
+  $('stats').innerHTML = Object.entries(GN).map(([k, n]) => { const s = (u.stats || {})[k] || { p: 0, w: 0, n: 0 };
+    return `<div class="rec"><span>${n}</span><b>${s.p} игр · ${s.w} побед${k === 'slots' || k === 'bj' || k === 'chess' ? ' · ' + (s.n >= 0 ? '+' : '') + s.n + '🪙' : ''}</b></div>`; }).join('');
+  $('avas').innerHTML = AVAS.map(a => `<button class="opt ${a === u.avatar ? 'on' : ''}" data-a="${a}">${a}</button>`).join('');
+  $('themes').innerHTML = THEMES.filter(t => !t[3] || (u.owned || []).includes(t[0])).map(t => `<button class="opt theme ${t[0] === u.theme ? 'on' : ''}" data-t="${t[0]}"><i style="background:${t[2]}"></i>${t[1]}</button>`).join('');
+  $('avas').querySelectorAll('button').forEach(b => b.onclick = () => upd(x => x.avatar = b.dataset.a));
+  $('themes').querySelectorAll('button').forEach(b => b.onclick = () => upd(x => x.theme = b.dataset.t));
+  const names = { '9,9,10': 'Новичок', '12,12,25': 'Любитель', '16,16,40': 'Эксперт' };
+  $('recs').innerHTML = Object.entries(names).map(([k, n]) =>
+    `<div class="rec"><span>Сапёр: ${n}</span><b>${u.records[k] ? u.records[k] + ' с' : '—'}</b></div>`).join('')
+    + `<div class="rec"><span>Инвокер: за 20 секунд</span><b>${u.records.invoker20 || '—'}</b></div>`
+    + [['sd36', 'Легко'], ['sd46', 'Средне'], ['sd54', 'Сложно']].map(([k, n]) => `<div class="rec"><span>Судоку: ${n}</span><b>${u.records[k] ? u.records[k] + ' с' : '—'}</b></div>`).join('');
+}
+
+/* ---------- сапёр ---------- */
+let W, H, M, cells, over, started, opened, flags, timer, secs, flagMode = false;
+
+function newGame() {
+  [W, H, M] = $('diff').value.split(',').map(Number);
+  cells = Array.from({ length: W * H }, () => ({ m: false, o: false, f: false, n: 0 }));
+  over = false; started = false; opened = 0; flags = 0; secs = 0;
+  clearInterval(timer);
+  $('msg').textContent = ''; $('time').textContent = '⏱ 0'; $('mines').textContent = '💣 ' + M;
+  $('board').style.gridTemplateColumns = `repeat(${W},auto)`;
+  $('board').innerHTML = '';
+  cells.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'c';
+    b.onclick = () => flagMode ? toggleFlag(i) : open(i);
+    b.oncontextmenu = e => { e.preventDefault(); toggleFlag(i); };
+    $('board').appendChild(b);
+  });
+}
+const around = i => {
+  const x = i % W, y = (i / W) | 0, r = [];
+  for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+    const nx = x + dx, ny = y + dy;
+    if ((dx || dy) && nx >= 0 && ny >= 0 && nx < W && ny < H) r.push(ny * W + nx);
+  }
+  return r;
+};
+function plant(safe) {
+  const ban = new Set([safe, ...around(safe)]);
+  let left = M;
+  while (left) {
+    const i = (Math.random() * W * H) | 0;
+    if (!cells[i].m && !ban.has(i)) { cells[i].m = true; left--; }
+  }
+  cells.forEach((c, i) => c.n = around(i).filter(j => cells[j].m).length);
+}
+function draw(i) {
+  const c = cells[i], b = $('board').children[i];
+  b.className = 'c' + (c.o ? ' o' : '');
+  b.textContent = '';
+  if (c.o) {
+    if (c.m) { b.classList.add('m'); b.textContent = '💣'; }
+    else if (c.n) { b.textContent = c.n; b.classList.add('n' + c.n); }
+  } else if (c.f) b.textContent = '🚩';
+}
+function toggleFlag(i) {
+  if (over || cells[i].o) return;
+  cells[i].f = !cells[i].f; flags += cells[i].f ? 1 : -1;
+  $('mines').textContent = '💣 ' + (M - flags); draw(i);
+}
+function open(i) {
+  if (over || cells[i].o || cells[i].f) return;
+  if (!started) {
+    started = true; plant(i);
+    timer = setInterval(() => $('time').textContent = '⏱ ' + (++secs), 1000);
+  }
+  const stack = [i];
+  while (stack.length) {
+    const k = stack.pop(), c = cells[k];
+    if (c.o || c.f) continue;
+    c.o = true; opened++; draw(k);
+    if (c.m) return lose();
+    if (!c.n) stack.push(...around(k));
+  }
+  if (opened === W * H - M) win();
+}
+function finish() { over = true; clearInterval(timer); }
+function lose() {
+  finish(); stat('mine', false); pulse($('board'), 'shake');
+  cells.forEach((c, i) => { if (c.m) { c.o = true; draw(i); } });
+  $('msg').textContent = '💥 Бум! Попробуйте ещё раз';
+}
+function win() {
+  finish(); stat('mine', true);
+  const rw = { 9: 30, 12: 60, 16: 100 }[W]; addCoins(rw, '+' + rw + ' 🪙'); confetti(['💎', '✨', '🪙'], 30);
+  cells.forEach((c, i) => { if (c.m && !c.f) toggleFlag(i); });
+  const key = $('diff').value, u = load()[me], best = u.records[key];
+  let t = '🏆 Победа за ' + secs + ' с';
+  if (!best || secs < best) { upd(x => x.records[key] = secs); t += ' — новый рекорд!'; }
+  $('msg').textContent = t;
+}
+$('again').onclick = newGame;
+$('diff').onchange = newGame;
+$('flagMode').onclick = e => { flagMode = !flagMode; e.currentTarget.classList.toggle('on', flagMode); };
+
+
+/* ---------- инвокер ---------- */
+const SPELLS = [['Cold Snap','🧊','QQQ'],['Ghost Walk','👻','QQW'],['Ice Wall','🧱','QQE'],['E.M.P.','🔮','WWW'],['Tornado','🌪️','QWW'],
+  ['Alacrity','💨','WWE'],['Sun Strike','☀️','EEE'],['Forge Spirit','🐺','EEQ'],['Chaos Meteor','☄️','EEW'],['Deafening Blast','📢','QWE']];
+const ORB = { Q: '❄️', W: '⚡', E: '🔥' };
+const norm = s => [...s].sort().join('');
+let iOrbs = [], iTarget = null, iScore = 0, iLeft = 20, iRun = false, iTimer, hints = false;
+
+function stopInv() { iRun = false; clearInterval(iTimer); }
+function drawOrbs() {
+  $('orbs').innerHTML = [0, 1, 2].map(i => `<div class="orb ${(iOrbs[i] || '').toLowerCase()} ${i === iOrbs.length - 1 ? 'new' : ''}">${ORB[iOrbs[i]] || ''}</div>`).join('');
+}
+function drawTarget() {
+  $('iIcon').textContent = iTarget ? iTarget[1] : '🔮';
+  $('iName').textContent = iTarget ? iTarget[0] : 'Нажмите «Старт»';
+  $('iForm').textContent = iTarget && hints ? 'Комбинация: ' + iTarget[2].split('').join(' + ') : '';
+}
+function nextSpell() {
+  let s; do { s = SPELLS[(Math.random() * SPELLS.length) | 0]; } while (s === iTarget);
+  iTarget = s; drawTarget();
+}
+function resetInv() {
+  stopInv(); iOrbs = []; iTarget = null; iScore = 0; iLeft = 20;
+  $('iTime').textContent = '⏱ 20'; $('iScore').textContent = '✨ 0'; $('iMsg').textContent = '';
+  $('iStart').textContent = 'Старт'; drawOrbs(); drawTarget();
+  $('iRef').innerHTML = '<h3>Шпаргалка</h3>' + SPELLS.map(s => `<div class="rec"><span>${s[1]} ${s[0]}</span><b>${s[2].split('').map(c => ORB[c]).join('')}</b></div>`).join('');
+}
+$('iStart').onclick = () => {
+  resetInv(); iRun = true; nextSpell(); $('iStart').textContent = 'Заново';
+  iTimer = setInterval(() => {
+    $('iTime').textContent = '⏱ ' + (--iLeft);
+    if (iLeft <= 0) endInv();
+  }, 1000);
+};
+function endInv() {
+  stopInv(); iTarget = null; drawTarget();
+  $('iName').textContent = 'Время вышло';
+  let t = '🏁 Призвано заклинаний: ' + iScore;
+  stat('invoker', iScore > 0);
+  if (iScore) { addCoins(iScore * 3, '+' + iScore * 3 + ' 🪙'); confetti(['✨', '🔮', '🪙'], 25); }
+  const best = load()[me].records.invoker20 || 0;
+  if (iScore > best) { upd(x => x.records.invoker20 = iScore); t += ' — новый рекорд!'; }
+  $('iMsg').textContent = t;
+}
+function press(k) {
+  if (!iRun) return;
+  if (k === 'R') {
+    if (iOrbs.length < 3) return $('iMsg').textContent = 'Нужно три сферы';
+    if (norm(iOrbs.join('')) === norm(iTarget[2])) {
+      iScore++; $('iScore').textContent = '✨ ' + iScore; $('iMsg').textContent = '✅ ' + iTarget[0] + '!'; pulse($('iIcon'), 'flash'); nextSpell();
+    } else $('iMsg').textContent = '❌ Не то заклинание';
+  } else { iOrbs.push(k); if (iOrbs.length > 3) iOrbs.shift(); drawOrbs(); }
+}
+document.querySelectorAll('.key').forEach(b => b.onclick = () => press(b.dataset.k));
+$('iHint').onclick = () => { hints = !hints; drawTarget(); };
+document.addEventListener('keydown', e => {
+  if ($('invoker').classList.contains('hidden') || e.ctrlKey || e.metaKey) return;
+  const k = { KeyQ: 'Q', KeyW: 'W', KeyE: 'E', KeyR: 'R' }[e.code];
+  if (k) { e.preventDefault(); press(k); }
+});
+
+
+/* ---------- монеты, статистика, эффекты ---------- */
+function pulse(el, c) { el.classList.remove(c); void el.offsetWidth; el.classList.add(c); }
+const coins = () => load()[me].coins ?? 1000;
+const addCoins = (n, note) => { upd(x => x.coins = (x.coins ?? 1000) + n); if (note) toast(note); };
+function stat(g, win, net = 0) {
+  upd(x => { x.stats = x.stats || {}; const s = x.stats[g] = x.stats[g] || { p: 0, w: 0, n: 0 }; s.p++; if (win) s.w++; s.n += net; });
+}
+function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2000); }
+function confetti(list, n = 30) {
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('span'); s.className = 'fx'; s.textContent = list[i % list.length];
+    s.style.cssText = `left:${Math.random() * 100}vw;font-size:${16 + Math.random() * 22}px;animation-duration:${1.4 + Math.random() * 1.6}s;animation-delay:${Math.random() * .5}s`;
+    document.body.appendChild(s); setTimeout(() => s.remove(), 3600);
+  }
+}
+const shuf = a => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+$('dole').onclick = () => coins() < 10 ? addCoins(100, '+100 🪙') : toast('У вас ещё есть монеты');
+document.querySelectorAll('[data-back]').forEach(b => b.onclick = () => view('catalog'));
+$('openSud').onclick = () => { view('sudoku'); sdNew(); };
+$('openSlots').onclick = () => view('slots');
+$('openBj').onclick = () => view('bj');
+
+const bets = { slots: 50, bj: 50 }, lock = {};
+function chips(el, key) {
+  $(el).innerHTML = [10, 50, 100, 500].map(v => `<button class="chip ${bets[key] === v ? 'on' : ''}" data-v="${v}">${v}</button>`).join('');
+  $(el).onclick = e => { const b = e.target.closest('[data-v]'); if (b && !lock[key]) { bets[key] = +b.dataset.v; chips(el, key); } };
+}
+chips('slChips', 'slots'); chips('bjChips', 'bj');
+
+/* ---------- судоку ---------- */
+let sdSol, sdGrid, sdFixed, sdSel = -1, sdErr, sdT, sdSecs, sdOn = false;
+function sdNew() {
+  clearInterval(sdT);
+  const rows = [], cols = [];
+  shuf([0, 1, 2]).forEach(g => shuf([0, 1, 2]).forEach(r => rows.push(g * 3 + r)));
+  shuf([0, 1, 2]).forEach(g => shuf([0, 1, 2]).forEach(c => cols.push(g * 3 + c)));
+  const nums = shuf([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  sdSol = []; for (const r of rows) for (const c of cols) sdSol.push(nums[(3 * (r % 3) + ((r / 3) | 0) + c) % 9]);
+  sdGrid = [...sdSol]; sdFixed = Array(81).fill(true);
+  shuf([...Array(81).keys()]).slice(0, +$('sdDiff').value).forEach(i => { sdGrid[i] = 0; sdFixed[i] = false; });
+  sdSel = -1; sdErr = 0; sdSecs = 0; sdOn = true;
+  $('sdErr').textContent = '❌ 0'; $('sdTime').textContent = '⏱ 0'; $('sdMsg').textContent = ''; $('sdBoard').classList.remove('win');
+  sdT = setInterval(() => $('sdTime').textContent = '⏱ ' + (++sdSecs), 1000);
+  sdDraw();
+}
+const sameBox = (a, b) => ((a / 9 | 0) / 3 | 0) === ((b / 9 | 0) / 3 | 0) && (a % 9 / 3 | 0) === (b % 9 / 3 | 0);
+const related = (a, b) => (a / 9 | 0) === (b / 9 | 0) || a % 9 === b % 9 || sameBox(a, b);
+const sdBad = i => sdGrid[i] && sdGrid.some((v, j) => j !== i && v === sdGrid[i] && related(i, j));
+function sdDraw() {
+  const sv = sdSel >= 0 ? sdGrid[sdSel] : 0;
+  $('sdBoard').innerHTML = sdGrid.map((v, i) => {
+    const r = i / 9 | 0, c = i % 9; let k = 'sc';
+    if (sdFixed[i]) k += ' fx2';
+    if (i === sdSel) k += ' sel'; else if (sdSel >= 0 && related(i, sdSel)) k += ' rel';
+    if (sv && v === sv && i !== sdSel) k += ' same';
+    if (sdBad(i)) k += ' bad';
+    if (c % 3 === 2 && c < 8) k += ' br'; if (r % 3 === 2 && r < 8) k += ' bb';
+    return `<button class="${k}" data-i="${i}" style="--d:${i}">${v || ''}</button>`;
+  }).join('');
+}
+$('sdBoard').onclick = e => { const b = e.target.closest('[data-i]'); if (b) { sdSel = +b.dataset.i; sdDraw(); } };
+$('sdPad').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫'].map(n => `<button data-n="${n}">${n}</button>`).join('');
+$('sdPad').onclick = e => { const b = e.target.closest('[data-n]'); if (b) sdSet(b.dataset.n === '⌫' ? 0 : +b.dataset.n); };
+function sdSet(n) {
+  if (!sdOn || sdSel < 0 || sdFixed[sdSel]) return;
+  sdGrid[sdSel] = n;
+  if (n && sdBad(sdSel)) { sdErr++; $('sdErr').textContent = '❌ ' + sdErr; }
+  sdDraw(); sdCheck();
+}
+function sdCheck() {
+  if (sdGrid.some((v, i) => !v || sdBad(i))) return;
+  sdOn = false; clearInterval(sdT);
+  $('sdBoard').classList.add('win');
+  const key = 'sd' + $('sdDiff').value, rw = { 36: 50, 46: 100, 54: 150 }[$('sdDiff').value];
+  const best = load()[me].records[key];
+  let t = '🏆 Решено за ' + sdSecs + ' с';
+  if (!best || sdSecs < best) { upd(x => x.records[key] = sdSecs); t += ' — новый рекорд!'; }
+  $('sdMsg').textContent = t; stat('sudoku', true); addCoins(rw, '+' + rw + ' 🪙'); confetti(['🔢', '✨', '🪙'], 40);
+}
+$('sdNew').onclick = sdNew; $('sdDiff').onchange = sdNew;
+$('sdHint').onclick = () => {
+  if (!sdOn || sdSel < 0 || sdFixed[sdSel]) return toast('Выберите пустую клетку');
+  if (coins() < 25) return toast('Не хватает монет');
+  addCoins(-25); sdGrid[sdSel] = sdSol[sdSel]; sdFixed[sdSel] = true; sdDraw(); sdCheck();
+};
+document.addEventListener('keydown', e => {
+  if ($('sudoku').classList.contains('hidden')) return;
+  if (/^[1-9]$/.test(e.key)) sdSet(+e.key); else if (e.key === 'Backspace' || e.key === 'Delete') sdSet(0);
+});
+
+/* ---------- слоты ---------- */
+const SYM = [['🍒', 30, 5], ['🍋', 26, 8], ['🔔', 20, 15], ['🍀', 12, 30], ['💎', 7, 60], ['7️⃣', 5, 150]];
+const pickSym = () => { let r = Math.random() * 100; for (const s of SYM) if ((r -= s[1]) < 0) return s; return SYM[0]; };
+$('slPay').innerHTML = SYM.map(s => `<div class="rec"><span>${s[0].repeat(3)}</span><b>×${s[2]}</b></div>`).join('') + '<div class="rec"><span>🍒🍒 (любые две)</span><b>×1.5</b></div>';
+$('spin').onclick = () => {
+  const bet = bets.slots; if (lock.slots) return;
+  if (coins() < bet) return toast('Не хватает монет');
+  lock.slots = true; addCoins(-bet); $('slMsg').textContent = ''; $('machine').classList.remove('win');
+  const res = [pickSym(), pickSym(), pickSym()];
+  [0, 1, 2].forEach(i => {
+    const el = $('r' + i); el.classList.add('spinning');
+    const iv = setInterval(() => el.textContent = SYM[(Math.random() * 6) | 0][0], 70);
+    setTimeout(() => {
+      clearInterval(iv); el.textContent = res[i][0]; el.classList.remove('spinning'); pulse(el, 'stop');
+      if (i === 2) settle(res, bet);
+    }, 800 + i * 450);
+  });
+};
+function settle(res, bet) {
+  let mult = 0;
+  if (res[0] === res[1] && res[1] === res[2]) mult = res[0][2];
+  else if (res.filter(s => s[0] === '🍒').length === 2) mult = 1.5;
+  const win = Math.floor(bet * mult);
+  lock.slots = false; stat('slots', win > bet, win - bet);
+  if (win) {
+    addCoins(win); $('slMsg').textContent = '🎉 Выигрыш: +' + win + ' 🪙';
+    pulse($('machine'), 'win'); confetti(['🪙', '✨', '💰'], mult >= 30 ? 70 : 25);
+  } else $('slMsg').textContent = 'Не повезло — попробуйте ещё';
+}
+
+/* ---------- блэкджек ---------- */
+let deck = [], pH = [], dH = [], bjStake = 0, hideD = false, acting = false;
+const SU = ['♠', '♥', '♦', '♣'], RK = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+function bjDraw() { if (deck.length < 15) { deck = []; SU.forEach(s => RK.forEach(r => deck.push({ r, s }))); shuf(deck); } return deck.pop(); }
+function val(h) {
+  let t = 0, a = 0;
+  h.forEach(c => { if (c.r === 'A') { a++; t += 11; } else t += 'JQK'.includes(c.r) ? 10 : +c.r; });
+  while (t > 21 && a) { t -= 10; a--; }
+  return t;
+}
+const cardEl = (c, hid) => { const d = document.createElement('div'); d.className = 'card' + (hid ? ' back' : (c.s === '♥' || c.s === '♦' ? ' red' : '')); d.innerHTML = hid ? '' : `${c.r}<small>${c.s}</small>`; return d; };
+function tot() { $('pTot').textContent = val(pH) || ''; $('dTot').textContent = dH.length ? (hideD ? val([dH[0]]) : val(dH)) : ''; }
+function give(h, id, hid) { const c = bjDraw(); h.push(c); $(id).appendChild(cardEl(c, hid)); tot(); }
+function bjUI(playing) { $('bjBet').classList.toggle('hidden', playing); $('bjAct').classList.toggle('hidden', !playing); }
+$('deal').onclick = () => {
+  if (lock.bj) return; const bet = bets.bj;
+  if (coins() < bet) return toast('Не хватает монет');
+  addCoins(-bet); lock.bj = true; bjStake = bet; pH = []; dH = []; hideD = true;
+  $('pHand').innerHTML = ''; $('dHand').innerHTML = ''; $('bjMsg').textContent = '';
+  give(pH, 'pHand');
+  setTimeout(() => give(dH, 'dHand'), 300);
+  setTimeout(() => give(pH, 'pHand'), 600);
+  setTimeout(() => { give(dH, 'dHand', true); bjUI(true); acting = true; if (val(pH) === 21) bjEnd('bj'); }, 900);
+};
+$('hit').onclick = () => {
+  if (!acting) return; give(pH, 'pHand');
+  if (val(pH) > 21) bjEnd('bust'); else if (val(pH) === 21) bjStand();
+};
+function bjStand() {
+  if (!acting) return; acting = false; hideD = false;
+  $('dHand').children[1].replaceWith(cardEl(dH[1])); tot();
+  const step = () => { if (val(dH) < 17) { give(dH, 'dHand'); setTimeout(step, 650); } else bjEnd(); };
+  setTimeout(step, 650);
+}
+$('stand').onclick = bjStand;
+$('dbl').onclick = () => {
+  if (!acting || pH.length !== 2) return toast('Удвоить можно только на первых двух картах');
+  if (coins() < bjStake) return toast('Не хватает монет');
+  addCoins(-bjStake); bjStake *= 2; give(pH, 'pHand');
+  if (val(pH) > 21) bjEnd('bust'); else bjStand();
+};
+function bjEnd(kind) {
+  acting = false; hideD = false;
+  const dc = $('dHand').children[1]; if (dc && dc.classList.contains('back')) dc.replaceWith(cardEl(dH[1]));
+  tot();
+  const p = val(pH), d = val(dH); let pay = 0, m;
+  if (kind === 'bust') m = '💥 Перебор!';
+  else if (kind === 'bj') { if (d === 21) { pay = bjStake; m = '🤝 У дилера тоже блэкджек'; } else { pay = Math.floor(bjStake * 2.5); m = '🃏 Блэкджек!'; } }
+  else if (d > 21) { pay = bjStake * 2; m = '🎉 У дилера перебор!'; }
+  else if (p > d) { pay = bjStake * 2; m = '🎉 Вы выиграли!'; }
+  else if (p === d) { pay = bjStake; m = '🤝 Ничья, ставка возвращена'; }
+  else m = '😔 Дилер выиграл';
+  if (pay) addCoins(pay);
+  stat('bj', pay > bjStake, pay - bjStake);
+  if (pay > bjStake) { m += ' +' + (pay - bjStake) + ' 🪙'; confetti(['🪙', '♠️', '✨'], 30); }
+  $('bjMsg').textContent = m; lock.bj = false; bjUI(false);
+}
+
+
+/* ---------- темы: эффекты и магазин ---------- */
+const FXC = { sakura: ['fall', '🌸'], matrix: ['matrix', '', '#00ff66'], aurora: ['aurora'], lava: ['rise', '●', '#ff6a2b'], frost: ['fall', '❄', '#cfefff'], cyber: ['rain', '', '#00f0ff'], galaxy: ['twinkle', '✦', '#ffffff'], storm: ['rain', '', '#9fc4ff'], gold: ['twinkle', '✦', '#ffd54a'], void: ['orbit', '●', '#c026ff'] };
+const cv = $('fxc'), cx = cv.getContext('2d'); let fxm = null, ps = [], flash = 0;
+const fxSize = () => { cv.width = innerWidth; cv.height = innerHeight; }; fxSize(); addEventListener('resize', fxSize);
+function applyTheme(id) {
+  const r = document.documentElement, t = THEMES.find(x => x[0] === id) || THEMES[0];
+  if (id === 'default') r.removeAttribute('data-theme'); else r.dataset.theme = id;
+  if (t[3]) r.dataset.paid = 1; else r.removeAttribute('data-paid');
+  fxm = matchMedia('(prefers-reduced-motion:reduce)').matches ? null : FXC[id] || null;
+  ps = fxm ? Array.from({ length: fxm[0] === 'matrix' ? 60 : 45 }, () => ({ x: Math.random(), y: Math.random(), s: .6 + Math.random() * .9, p: Math.random() * 6 })) : [];
+  cx.clearRect(0, 0, cv.width, cv.height);
+}
+function fxLoop(t) {
+  requestAnimationFrame(fxLoop); if (!fxm) return;
+  const w = cv.width, h = cv.height, m = fxm[0]; cx.clearRect(0, 0, w, h); cx.fillStyle = fxm[2] || '#fff'; cx.font = '20px sans-serif';
+  if (m === 'aurora') {
+    for (let k = 0; k < 3; k++) {
+      const g = cx.createLinearGradient(0, 0, 0, h * .6); g.addColorStop(0, '#0000'); g.addColorStop(.5, ['#34d39977', '#60a5fa77', '#c084fc77'][k]); g.addColorStop(1, '#0000');
+      cx.fillStyle = g; cx.beginPath(); cx.moveTo(0, 0);
+      for (let x = 0; x <= w; x += 40) cx.lineTo(x, h * .12 + k * 50 + Math.sin(x / 160 + t / 1500 + k) * 60);
+      cx.lineTo(w, h * .6); cx.lineTo(0, h * .6); cx.fill();
+    } return;
+  }
+  ps.forEach(p => {
+    const s = p.s;
+    if (m === 'fall') { p.y += .0016 * s; p.x += Math.sin(t / 900 + p.p) * .0004; if (p.y > 1.05) p.y = -.05; cx.fillText(fxm[1], p.x * w, p.y * h); }
+    else if (m === 'rise') { p.y -= .0012 * s; p.x += Math.sin(t / 700 + p.p) * .0005; if (p.y < -.05) p.y = 1.05; cx.globalAlpha = .7; cx.fillText(fxm[1], p.x * w, p.y * h); cx.globalAlpha = 1; }
+    else if (m === 'twinkle') { cx.globalAlpha = .3 + .7 * Math.abs(Math.sin(t / 600 + p.p)); cx.fillText(fxm[1], p.x * w, p.y * h); cx.globalAlpha = 1; }
+    else if (m === 'rain') { p.y += .012 * s; p.x -= .002 * s; if (p.y > 1.05) { p.y = -.05; p.x = Math.random() * 1.1; } cx.fillRect(p.x * w, p.y * h, 1.5, 16); }
+    else if (m === 'matrix') { p.y += .004 * s; if (p.y > 1.05) p.y = -.05; cx.fillText(String.fromCharCode(0x30a0 + ((t / 90 + p.p * 50) | 0) % 60), p.x * w, p.y * h); }
+    else if (m === 'orbit') { const a = t / 2000 * s + p.p, r = 60 + p.y * Math.min(w, h) * .55; cx.globalAlpha = .6; cx.fillText('●', w / 2 + Math.cos(a) * r * 1.4, h / 2 + Math.sin(a) * r * .7); cx.globalAlpha = 1; }
+  });
+  if (fxm === FXC.storm) { if (Math.random() < .004) flash = 1; if (flash > 0) { cx.fillStyle = '#fff'; cx.globalAlpha = flash * .22; cx.fillRect(0, 0, w, h); cx.globalAlpha = 1; flash -= .06; } }
+}
+requestAnimationFrame(fxLoop);
+function renderShop() {
+  const u = load()[me], own = u.owned || [];
+  $('shopGrid').innerHTML = THEMES.filter(t => t[3]).map(t => {
+    const has = own.includes(t[0]), cur = u.theme === t[0];
+    return `<div class="tcard ${cur ? 'cur' : ''}"><div class="sw" style="background:linear-gradient(135deg,${t[2]},#000)"></div><h3>${t[1]}</h3><p>${t[4]}</p>` +
+      (has ? `<button class="btn ${cur ? 'ghost' : ''}" data-a="use" data-id="${t[0]}">${cur ? 'Выбрано' : 'Применить'}</button>`
+        : `<button class="btn" data-a="buy" data-id="${t[0]}">${t[3]} 🪙</button> <button class="btn ghost" data-a="try" data-id="${t[0]}">Примерить</button>`) + '</div>';
+  }).join('');
+}
+$('shopGrid').onclick = e => {
+  const b = e.target.closest('[data-a]'); if (!b) return;
+  const id = b.dataset.id, t = THEMES.find(x => x[0] === id);
+  if (b.dataset.a === 'try') applyTheme(id);
+  else if (b.dataset.a === 'use') { upd(x => x.theme = id); renderShop(); }
+  else {
+    if (coins() < t[3]) return toast('Не хватает монет');
+    upd(x => { x.coins = (x.coins ?? 1000) - t[3]; x.owned = [...(x.owned || []), id]; x.theme = id; });
+    confetti(['✨', '🪙', '🎨'], 40); toast('Тема куплена!'); renderShop();
+  }
+};
+
+/* ---------- мини-Дота ---------- */
+const D = { paused: true, ready: false, units: [], fx: [], wards: [], trees: [], req: [], flames: [], run: false, t: 0, diff: 'normal', cx: -40, cz: 0, mx: -1, my: -1, tgt: null, cap: null };
+const dst = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+const ITEMS = {
+  tango: { n: 'Tango', e: '🌿', c: 90, d: 'Лечит 160 HP за 8 с' }, fairy: { n: 'Faerie Fire', e: '🧚', c: 70, d: '+100 HP сразу' },
+  ward: { n: 'Observer Ward', e: '👁️', c: 60, d: 'Обычный обзор в небольшом круге (14) на 6 мин, ломается за 3 удара' }, sentry: { n: 'Sentry Ward', e: '🔵', c: 80, d: 'Раскрывает невидимость и вражеские варды, радиус 14' }, branch: { n: 'Iron Branch', e: '🌱', c: 50, d: '+1 ко всем атрибутам; ПКМ по слоту — посадить дерево' },
+  grenade: { n: 'Граната', e: '💣', c: 120, d: '170 урона по области у курсора' }, clarity: { n: 'Clarity', e: '💧', c: 50, d: '+120 маны за 20 с' },
+  salve: { n: 'Healing Salve', e: '🍶', c: 100, d: 'Лечит 320 HP за 8 с' }, mango: { n: 'Enchanted Mango', e: '🥭', c: 70, d: '+110 маны' },
+  bottle: { n: 'Bottle', e: '🧪', c: 150, d: '3 заряда: HP и мана; заряжается у фонтана' }, stick: { n: 'Magic Stick', e: '🪄', c: 100, d: 'Копит заряды от способностей (до 10)' },
+  wand: { n: 'Magic Wand', e: '✨', c: 250, d: '+3 к атрибутам, до 15 зарядов' }, eul: { n: "Eul's Scepter", e: '🌀', c: 350, d: 'На цель (враг, крип или ты сам, дальность 16): подброс на 2.5 с' },
+  sb: { n: 'Shadow Blade', e: '🗡️', c: 450, d: 'Невидимость 10 с, первый удар +80, +20 урона' },
+};
+const BOT_BUY = ['ward', 'clarity', 'bottle', 'stick', 'mango', 'sb', 'wand', 'eul', 'salve'];
+const UNIQ = ['wand', 'stick', 'sb', 'eul', 'bottle'];
+const DF = {
+  easy: { n: 'Лёгкая', th: .55, aim: 1.3, ult: 0, fancy: 0, ward: 1, sen: 0, mis: .35, dm: .75, rw: 400 },
+  normal: { n: 'Средняя', th: .35, aim: 2.2, ult: 1, fancy: 1, ward: 1, sen: 1, mis: .12, dm: 1, rw: 900 },
+  hard: { n: 'Сложная', th: .22, aim: 2.8, ult: 1, fancy: 1, ward: 1, sen: 1, mis: .03, dm: 1.1, rw: 1500 },
+  insane: { n: 'Безумная', th: .12, aim: 3.4, ult: 1, fancy: 1, ward: 1, sen: 1, mis: 0, dm: 1.25, rw: 2500 },
+};
+const WSP = [[10, -9], [10, 9], [3, 0], [18, -11], [18, 11], [-2, -8]];
+const VIS = { hero: 24, tower: 18, creep: 14 }, WRV = 14;
+const gh = x => { const a = Math.abs(x); return a <= 30 ? 0 : a >= 34 ? 2.5 : (a - 30) / 4 * 2.5; };
+const SK = [{ d: 5, k: 1 }, { d: 9, k: 1.15 }, { d: 13, k: 1.3 }];
+const REQ_R = 15, RAZE_CD = 4.5;
+const MM = (g, c, o) => new THREE.Mesh(g, new THREE.MeshLambertMaterial(Object.assign({ color: c, transparent: true }, o)));
+const BM = (g, c) => new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: c, transparent: true }));
+
+/* --- клавиши --- */
+const KEYDEF = [['r0', 'Raze 1', 'KeyQ'], ['r1', 'Raze 2', 'KeyW'], ['r2', 'Raze 3', 'KeyE'], ['r3', 'Requiem', 'KeyR'], ['s0', 'Слот 1', 'KeyZ'], ['s1', 'Слот 2', 'KeyX'], ['s2', 'Слот 3', 'KeyC'], ['s3', 'Слот 4', 'KeyV'], ['s4', 'Слот 5', 'KeyB'], ['s5', 'Слот 6', 'KeyN'], ['shop', 'Магазин', 'KeyG']];
+let KEYS = {};
+try { KEYS = JSON.parse(localStorage.getItem('dotaKeys') || '{}'); } catch (e) { KEYS = {}; }
+KEYDEF.forEach(k => { if (!KEYS[k[0]]) KEYS[k[0]] = k[2]; });
+const kn = c => c.replace(/^(Key|Digit)/, '').replace('Space', '␣').replace('Arrow', '');
+function saveKeys() { try { localStorage.setItem('dotaKeys', JSON.stringify(KEYS)); } catch (e) { } }
+function renderKeys() {
+  $('dKeys').innerHTML = KEYDEF.map(k => `<button class="kb ${D.cap === k[0] ? 'cap' : ''}" data-a="${k[0]}"><small>${k[1]}</small><b>${D.cap === k[0] ? '…' : kn(KEYS[k[0]])}</b></button>`).join('');
+  document.querySelectorAll('[data-kl]').forEach(el => el.textContent = kn(KEYS[el.dataset.kl]));
+  $('dShopK').textContent = kn(KEYS.shop);
+}
+
+/* --- иконки способностей --- */
+function abIcon(n) {
+  if (n < 3) { const r = [7, 11, 15][n], h = [8, 11, 14][n]; return `<svg viewBox="0 0 48 48"><defs><radialGradient id="ag${n}" cx="50%" cy="60%"><stop offset="0" stop-color="#6a1010"/><stop offset="1" stop-color="#080202"/></radialGradient></defs><rect width="48" height="48" fill="url(#ag${n})"/><ellipse cx="24" cy="34" rx="${r + 4}" ry="${r / 2 + 3}" fill="#000" stroke="#ff3b1f" stroke-width="2"/><path d="M24 34 L${24 - r} ${34 - h - 4} L${24 - r / 3} ${32 - h / 2} L24 ${8 + (2 - n) * 3} L${24 + r / 3} ${32 - h / 2} L${24 + r} ${34 - h - 4} Z" fill="#ff6a2a" opacity=".92"/><path d="M24 34 L${24 - r / 2} ${30 - h} L24 ${16 + (2 - n) * 3} L${24 + r / 2} ${30 - h} Z" fill="#ffd27a" opacity=".85"/></svg>`; }
+  let rays = ''; for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; rays += `<line x1="${24 + Math.cos(a) * 9}" y1="${24 + Math.sin(a) * 9}" x2="${24 + Math.cos(a) * 21}" y2="${24 + Math.sin(a) * 21}" stroke="#ff2a1a" stroke-width="2.2"/>`; }
+  return `<svg viewBox="0 0 48 48"><rect width="48" height="48" fill="#12030a"/>${rays}<circle cx="24" cy="24" r="10" fill="#000" stroke="#ff5a2a" stroke-width="2"/><path d="M19 22 L22 25 L19 26 Z M29 22 L26 25 L29 26 Z" fill="#ff4a1a"/></svg>`;
+}
+
+/* --- текстуры --- */
+function cobbleTex() {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+  g.fillStyle = '#26323e'; g.fillRect(0, 0, 256, 256);
+  for (let r = 0; r < 8; r++) for (let q = -1; q < 8; q++) {
+    const off = r % 2 ? 16 : 0; g.fillStyle = `hsl(${200 + Math.random() * 14 | 0},${12 + Math.random() * 10 | 0}%,${36 + Math.random() * 16 | 0}%)`;
+    g.fillRect(q * 32 + off + 2, r * 32 + 2, 28, 28);
+  }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(15, 7); return t;
+}
+
+function dotaInit() {
+  D.ready = true; const w = $('dView');
+  D.r = new THREE.WebGLRenderer({ antialias: true }); w.prepend(D.r.domElement);
+  D.sc = new THREE.Scene(); D.sc.background = new THREE.Color(0x1a2140); D.sc.fog = new THREE.Fog(0x2a3560, 45, 100);
+  D.cam = new THREE.PerspectiveCamera(50, 1.7, .1, 300); D.ray = new THREE.Raycaster(); D.plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); D.clock = new THREE.Clock();
+  D.sc.add(new THREE.HemisphereLight(0x9fb2ff, 0x2b2b48, .95));
+  const dl = new THREE.DirectionalLight(0xb8c4ff, .55); dl.position.set(-10, 30, 14); D.sc.add(dl);
+  const flat = (gw, gd, col, y, o) => { const m = MM(new THREE.PlaneGeometry(gw, gd), col, o); m.rotation.x = -Math.PI / 2; m.position.y = y; D.sc.add(m); return m; };
+  flat(240, 140, 0x3f8a3a, -.03);                                   // трава
+  flat(60, 28, 0xffffff, .03, { map: cobbleTex() });                 // брусчатка арены
+  [-1, 1].forEach(s => {
+    const pl = MM(new THREE.BoxGeometry(26, 2.5, 30), 0x4a5a72); pl.position.set(s * 47, 1.25, 0); D.sc.add(pl);
+    const pt = MM(new THREE.PlaneGeometry(26, 30), 0xffffff, { map: cobbleTex() }); pt.rotation.x = -Math.PI / 2; pt.position.set(s * 47, 2.53, 0); D.sc.add(pt);
+    for (let i = 0; i < 5; i++) { const st = MM(new THREE.BoxGeometry(.8, .5 * (i + 1), 8), 0x6d7c96); st.position.set(s * (30.4 + i * .8), .25 * (i + 1), 0); D.sc.add(st); }
+    const f = MM(new THREE.CylinderGeometry(4, 4, .6, 20), s < 0 ? 0x2c6fb5 : 0xb53c3c, { emissive: s < 0 ? 0x0a2a55 : 0x550a0a }); f.position.set(s * 46, 2.8, 0); D.sc.add(f);
+  });
+  [-1, 1].forEach(z => { const rim = MM(new THREE.BoxGeometry(60, .5, .8), 0x55637d); rim.position.set(0, .25, z * 14.4); D.sc.add(rim); });
+  // колонны с факелами
+  D.flames = [];
+  [[-24, -14], [-12, -14], [0, -14], [12, -14], [24, -14], [-24, 14], [-12, 14], [0, 14], [12, 14], [24, 14]].forEach(([x, z], i) => {
+    const p = MM(new THREE.BoxGeometry(1.3, 3.4, 1.3), 0x6c7896); p.position.set(x, 1.7, z); D.sc.add(p);
+    const cp = MM(new THREE.BoxGeometry(2, .5, 2), 0x8390ad); cp.position.set(x, 3.6, z); D.sc.add(cp);
+    const fl = MM(new THREE.ConeGeometry(.6, 1.6, 8), 0xff8a1e, { emissive: 0xff6a00 }); fl.position.set(x, 4.6, z); D.sc.add(fl); D.flames.push(fl);
+    if (i % 2 === 0) { const L = new THREE.PointLight(0xff8a30, .9, 20); L.position.set(x, 5.5, z); D.sc.add(L); fl.userData.L = L; }
+  });
+  // знамёна и обломки
+  [-1, 1].forEach(z => { const pole = MM(new THREE.CylinderGeometry(.12, .12, 6, 6), 0x2a2a2a); pole.position.set(6 * z, 3, z * 17); D.sc.add(pole); const fg = MM(new THREE.PlaneGeometry(1.6, 3), 0x8a1420, { side: THREE.DoubleSide }); fg.position.set(6 * z + .9, 4.2, z * 17); D.sc.add(fg); });
+  for (let i = 0; i < 16; i++) { const b = MM(new THREE.BoxGeometry(.8 + Math.random() * 1.2, .5 + Math.random() * .8, .8 + Math.random()), 0x66738f); b.position.set((Math.random() - .5) * 56, .3, (Math.random() < .5 ? -1 : 1) * (15 + Math.random() * 8)); b.rotation.y = Math.random() * 3; D.sc.add(b); }
+  for (let i = 0; i < 44; i++) { const t = new THREE.Group(); t.add(MM(new THREE.CylinderGeometry(.25, .35, 2, 6), 0x4a3320)); const l = MM(new THREE.ConeGeometry(1.6, 4, 8), 0x2a6b3a); l.position.y = 3; t.add(l); t.position.set((Math.random() - .5) * 112, 1, (Math.random() < .5 ? -1 : 1) * (17 + Math.random() * 14)); D.sc.add(t); }
+  // туман войны: чёрная маска с «дырами» вокруг вижена
+  D.fc = document.createElement('canvas'); D.fc.width = 480; D.fc.height = 280; D.fg = D.fc.getContext('2d'); D.ft = new THREE.CanvasTexture(D.fc);
+  D.fogM = new THREE.Mesh(new THREE.PlaneGeometry(240, 140), new THREE.MeshBasicMaterial({ map: D.ft, transparent: true, depthTest: false, depthWrite: false, fog: false }));
+  D.fogM.rotation.x = -Math.PI / 2; D.fogM.position.y = 12; D.fogM.renderOrder = 9; D.sc.add(D.fogM);
+
+  // HUD
+  $('dAbils').innerHTML = [0, 1, 2, 3].map(i => `<button class="ab" data-k="${i}" title="${i < 3 ? 'Shadowraze ' + (i + 1) : 'Requiem of Souls (с 6 ур.)'}">${abIcon(i)}<span class="kl" data-kl="r${i}"></span><span class="mc">${i < 3 ? 40 : 150}</span></button>`).join('');
+  $('dSlots').innerHTML = [0, 1, 2, 3, 4, 5].map(i => `<button class="sl" data-s="${i}"><span class="kl" data-kl="s${i}"></span><span class="ie"></span></button>`).join('');
+  $('dDiff').innerHTML = Object.entries(DF).map(([k, v]) => `<button data-d="${k}" class="${k === D.diff ? 'on' : ''}">${v.n}</button>`).join('');
+  renderKeys();
+  $('dShopG').innerHTML = Object.entries(ITEMS).map(([id, i]) => `<button data-id="${id}"><span>${i.e}</span> ${i.n}<b>${i.c}🪙</b><small>${i.d}</small></button>`).join('');
+
+  $('dDiff').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; D.diff = b.dataset.d; $('dDiff').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
+  $('dKeys').onclick = e => { const b = e.target.closest('[data-a]'); if (!b) return; D.cap = D.cap === b.dataset.a ? null : b.dataset.a; renderKeys(); };
+  $('dKeyReset').onclick = () => { KEYDEF.forEach(k => KEYS[k[0]] = k[2]); D.cap = null; saveKeys(); renderKeys(); };
+  $('dPlay').onclick = () => { D.cap = null; dotaStart(true); };
+  $('dAgain').onclick = () => { dotaStart(false); };
+
+  // мышь: камера у краёв, прицел
+  w.addEventListener('mousemove', e => { const r = w.getBoundingClientRect(); D.mx = e.clientX - r.left; D.my = e.clientY - r.top; D.vw = r.width; D.vh = r.height; D.mp = mouseGround(e); });
+  w.addEventListener('mouseleave', () => D.mx = -1);
+  const cvs = D.r.domElement;
+  cvs.addEventListener('contextmenu', e => {
+    e.preventDefault(); if (!D.run || D.me.dead) return;
+    if (D.tgt !== null) { D.tgt = null; dTgtUi(); return; }
+    if (D.me.castT > 0) return;
+    const p = mouseGround(e), t = pickUnit(e, true);
+    if (t && t !== D.me && (t.t !== 0 || (t.k === 'creep' && t.hp < t.max * .5))) D.me.order = { type: 'atk', t };
+    else if (p) { const x = Math.max(-46, Math.min(46, p.x)), z = Math.max(-20, Math.min(20, p.z)); D.me.order = { type: 'move', x, z }; arrowAt(x, z); }
+  });
+  cvs.addEventListener('click', e => {
+    if (D.tgt === null || !D.run) return; mouseGround(e);
+    const t = pickUnit(e, false), it = D.me.inv[D.tgt];
+    if (!it || it.id !== 'eul') { D.tgt = null; dTgtUi(); return; }
+    if (!t || t.k === 'tower') return toast('Нужна цель: герой или крип');
+    if (dst(t, D.me) > 16) return toast('Слишком далеко (дальность 16)');
+    useItem(D.me, D.tgt, t); D.tgt = null; dTgtUi();
+  });
+  document.querySelectorAll('.ab').forEach(b => b.onclick = () => { faceMouse(); cast(D.me, +b.dataset.k); });
+  document.querySelectorAll('.sl').forEach(b => { b.onclick = () => { faceMouse(); useItem(D.me, +b.dataset.s); }; b.oncontextmenu = e => { e.preventDefault(); plantTree(D.me, +b.dataset.s); }; });
+  $('dShopBtn').onclick = () => $('dShop').classList.toggle('hidden');
+  $('dShopG').onclick = e => { const b = e.target.closest('[data-id]'); if (b && D.run) { const r = buy(D.me, b.dataset.id); toast(r === 'dup' ? 'Этот предмет нельзя купить дважды' : r ? 'Куплено' : 'Не хватает золота или мест'); } };
+  $('dFs').onclick = () => { const on = !$('dView').classList.contains('fs'); $('dView').classList.toggle('fs', on); $('dFs').textContent = on ? '⛶ Свернуть' : '⛶ На весь экран';
+    if (on) { const p = $('dView').requestFullscreen && $('dView').requestFullscreen(); if (p && p.catch) p.catch(() => { }); } else if (document.fullscreenElement) document.exitFullscreen(); setTimeout(dSize, 60); };
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && $('dView').classList.contains('fs')) { $('dView').classList.remove('fs'); $('dFs').textContent = '⛶ На весь экран'; } setTimeout(dSize, 60); });
+  addEventListener('resize', dSize);
+  document.addEventListener('keydown', e => {
+    if ($('dota').classList.contains('hidden')) return;
+    if (D.cap) {   // переназначение клавиши
+      e.preventDefault(); if (e.code !== 'Escape') { const old = KEYS[D.cap], other = KEYDEF.find(k => KEYS[k[0]] === e.code && k[0] !== D.cap); if (other) KEYS[other[0]] = old; KEYS[D.cap] = e.code; saveKeys(); }
+      D.cap = null; renderKeys(); return;
+    }
+    if (!D.run || e.ctrlKey || e.metaKey) return;
+    const act = KEYDEF.find(k => KEYS[k[0]] === e.code);
+    if (act) {
+      e.preventDefault(); const a = act[0];
+      if (a === 'shop') $('dShop').classList.toggle('hidden');
+      else if (a[0] === 'r') { faceMouse(); cast(D.me, +a[1]); }
+      else { faceMouse(); useItem(D.me, +a[1]); }
+    } else if (e.code === 'Space') { e.preventDefault(); D.cx = D.me.x; D.cz = D.me.z; }
+    else if (e.code === 'KeyS') D.me.order = null;
+    else if (e.code === 'Escape' && D.tgt !== null) { D.tgt = null; dTgtUi(); }
+  });
+  dLoop();
+}
+const dTgtUi = () => $('dView').classList.toggle('tgt', D.tgt !== null);
+function dSize() { if (!D.ready) return; const fs = $('dView').classList.contains('fs'), w = fs ? innerWidth : $('dView').clientWidth, h = fs ? innerHeight : Math.round(Math.min(600, Math.max(430, innerHeight * .68))); if (!w) return; D.r.setSize(w, h); D.cam.aspect = w / h; D.cam.updateProjectionMatrix(); $('dView').style.height = h + 'px'; }
+function mouseGround(e) {
+  const r = D.r.domElement.getBoundingClientRect(); D.cam.updateMatrixWorld();
+  D.ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1), D.cam);
+  const p = new THREE.Vector3(); return D.ray.ray.intersectPlane(D.plane, p);
+}
+function pickUnit(e, withWards) {
+  const list = D.units.filter(u => !u.dead && u.mesh.visible).map(u => u.mesh);
+  if (withWards) D.wards.forEach(w => { if (!w.dead && w.t !== 0 && w.mesh.visible) list.push(w.mesh); });
+  const hits = D.ray.intersectObjects(list, true); if (!hits.length) return null;
+  let o = hits[0].object; while (o && !o.userData.u) o = o.parent; return o && o.userData.u;
+}
+const faceMouse = () => { if (D.mp && D.me) D.me.face = Math.atan2(D.mp.z - D.me.z, D.mp.x - D.me.x); };
+$('openDota').onclick = () => {
+  if (typeof THREE === 'undefined') return toast('Для 3D нужен интернет (Three.js)');
+  view('dota'); if (!D.ready) dotaInit(); dSize(); dotaStart(false);
+};
+
+function bar(w, col) { const g = new THREE.Group(), bg = BM(new THREE.PlaneGeometry(w, .38), 0x000000), fg = BM(new THREE.PlaneGeometry(w, .3), col); fg.position.z = .01; g.add(bg, fg); g.fg = fg; g.w = w; return g; }
+function mk(k, t, x, z, o) {
+  const u = Object.assign({ k, t, x, z, face: t ? Math.PI : 0, cd: 0, dead: false, invisT: 0, cycT: 0, castT: 0, tgt: null, ta: 0, pulse: 0 }, o);
+  const mesh = new THREE.Group(), body = new THREE.Group(), col = t ? 0xd94a4a : 0x4a9ad9; mesh.add(body);
+  if (k === 'hero') {
+    const b1 = MM(new THREE.CylinderGeometry(.7, .95, 2.4, 10), 0x1a1a1a); b1.position.y = 1.2;
+    const hd = MM(new THREE.SphereGeometry(.65, 12, 10), col); hd.position.y = 2.9;
+    const rg = MM(new THREE.TorusGeometry(1.1, .09, 6, 18), 0xff3b30, { emissive: 0xff3b30 }); rg.rotation.x = Math.PI / 2; rg.position.y = .15; body.add(b1, hd, rg);
+  } else if (k === 'creep') { const c = MM(new THREE.BoxGeometry(1.2, 1.5, 1.2), col); c.position.y = .75; body.add(c); }
+  else { const c = MM(new THREE.CylinderGeometry(1.5, 2, 7, 8), col); c.position.y = 3.5; const p = MM(new THREE.ConeGeometry(2, 2.5, 8), 0xffd166, { emissive: 0x553300 }); p.position.y = 8.2; body.add(c, p); }
+  const b = bar(k === 'tower' ? 4 : 2, t ? 0xef4444 : 0x4ade80); b.position.y = k === 'tower' ? 10.5 : k === 'hero' ? 3.9 : 2.4; mesh.add(b);
+  Object.assign(u, { bar: b, mesh, body }); mesh.userData.u = u; D.sc.add(mesh); D.units.push(u); return u;
+}
+function recalc(h) {
+  const b = h.bonus + h.inv.filter(i => i.id === 'wand').length * 3;
+  h.str = 22 + h.lv * 2.6 + b; h.agi = 20 + h.lv * 2.2 + b; h.int = 18 + h.lv * 1.8 + b;
+  const nm = Math.round(200 + h.str * 18), np = Math.round(80 + h.int * 10);
+  if (h.max) { h.hp += nm - h.max; h.mana += np - h.mmax; } else { h.hp = nm; h.mana = np; }
+  h.max = nm; h.mmax = np;
+  h.dmg = Math.round((34 + h.agi * .9 + h.souls + (h.inv.some(i => i.id === 'sb') ? 20 : 0)) * (h.dm || 1));
+  h.spd = 9 + (h.inv.some(i => i.id === 'eul') ? 1 : 0);
+}
+function mkHero(t) { const h = mk('hero', t, t ? 40 : -40, 0, { lv: 1, xp: 0, gold: 700, souls: 0, bonus: 0, deaths: 0, kills: 0, inv: [], cds: [0, 0, 0, 0], rng: 7, as: .85, respT: 0, hot: 0, hotT: 0, mot: 0, motT: 0, order: null, think: 0, bi: 0, dm: 1 }); recalc(h); return h; }
+function dotaStart(run) {
+  D.units.forEach(u => D.sc.remove(u.mesh)); D.wards.forEach(w => D.sc.remove(w.mesh)); D.trees.forEach(t => D.sc.remove(t)); D.fx.forEach(f => D.sc.remove(f.m));
+  Object.assign(D, { units: [], wards: [], trees: [], fx: [], req: [], t: 0, wave: 0, run: !!run, hu: 0, tgt: null, cap: null });
+  D.tw0 = mk('tower', 0, -26, 0, { hp: 1600, max: 1600 }); D.tw1 = mk('tower', 1, 26, 0, { hp: 1600, max: 1600 });
+  D.me = mkHero(0); D.bot = mkHero(1);
+  const P = DF[D.diff]; D.bot.dm = P.dm; recalc(D.bot); D.buy = BOT_BUY.filter(id => P.fancy || (id !== 'sb' && id !== 'eul'));
+  D.cx = D.me.x; D.cz = 0; dTgtUi(); renderKeys();
+  $('dOver').classList.add('hidden'); $('dShop').classList.add('hidden'); $('dMenu').classList.toggle('hidden', !!run);
+  if (run) toast('Камера: подведи мышь к краю экрана · Пробел — к герою');
+}
+function spawnWave() { for (let t = 0; t < 2; t++) for (let i = 0; i < 3; i++) { const hp = 220 + D.t * .8; mk('creep', t, (t ? 42 : -42) + (t ? i : -i) * 2, (i - 1) * 2.2, { hp, max: hp, dmg: 11 + D.t * .03, rng: 2.6, as: 1.1, spd: 5 }); } }
+function trueSight(t, vt) { return D.wards.some(w => w.t === vt && w.type === 'sentry' && !w.dead && dst(w, t) < w.r) || D.units.some(e => e.k === 'hero' && !e.dead && e.t === vt && dst(e, t) < 3); }
+function wardSeen(w, vt) { return w.t === vt || D.wards.some(s => s.t === vt && s.type === 'sentry' && !s.dead && dst(s, w) < s.r); }
+function seen(t, vt) {
+  if (t.t === vt) return true;
+  if (t.invisT > 0 && !trueSight(t, vt)) return false;
+  const hi = gh(t.x) > 1;
+  return D.units.some(s => !s.dead && s.t === vt && dst(s, t) < VIS[s.k] && (!hi || gh(s.x) > 1)) || D.wards.some(w => w.t === vt && w.type === 'ward' && !w.dead && dst(w, t) < w.rv && (!hi || gh(w.x) > 1));
+}
+function ring(x, z, r, c) { const m = new THREE.Mesh(new THREE.CircleGeometry(1, 28), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: .6, side: THREE.DoubleSide })); m.rotation.x = -Math.PI / 2; m.position.set(x, gh(x) + .2, z); m.scale.set(.2, .2, 1); D.sc.add(m); D.fx.push({ m, life: .4, max: .4, r, type: 'ring' }); }
+function beam(a, b, c) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a.x, 3, a.z), new THREE.Vector3(b.x, 1.5, b.z)]), new THREE.LineBasicMaterial({ color: c, transparent: true })); D.sc.add(l); D.fx.push({ m: l, life: .15, max: .15, type: 'beam' }); }
+function arrowAt(x, z) {
+  const g = new THREE.Group(), c = BM(new THREE.ConeGeometry(.45, 1.3, 8), 0x3dff5a); c.rotation.x = Math.PI; c.position.y = 1.4;
+  const r = BM(new THREE.RingGeometry(.5, .75, 20), 0x3dff5a); r.rotation.x = -Math.PI / 2; r.position.y = .1; g.add(c, r); g.position.set(x, gh(x), z); D.sc.add(g);
+  D.fx.filter(f => f.type === 'arrow').forEach(f => f.life = 0); D.fx.push({ m: g, life: .7, max: .7, type: 'arrow', y0: gh(x) });
+}
+function razeFx(x, z) {
+  const g = new THREE.Group(), fl = (m, y) => { m.rotation.x = -Math.PI / 2; m.position.y = y; g.add(m); };
+  fl(new THREE.Mesh(new THREE.CircleGeometry(3.3, 32), new THREE.MeshBasicMaterial({ color: 0x160000, transparent: true, side: THREE.DoubleSide })), .05);
+  fl(new THREE.Mesh(new THREE.RingGeometry(2.9, 3.4, 40), new THREE.MeshBasicMaterial({ color: 0xff2a10, transparent: true, side: THREE.DoubleSide })), .08);
+  for (let i = 0; i < 16; i++) {
+    const a = Math.random() * 6.283, r = Math.sqrt(Math.random()) * 3, h = 2 + Math.random() * 2.4;
+    const c = new THREE.Mesh(new THREE.ConeGeometry(.28 + Math.random() * .25, h, 6), new THREE.MeshBasicMaterial({ color: i % 3 ? 0xff3311 : 0x260000, transparent: true }));
+    c.position.set(Math.cos(a) * r, 0, Math.sin(a) * r); c.userData.h = h; g.add(c);
+  }
+  g.position.set(x, gh(x), z); D.sc.add(g); D.fx.push({ m: g, life: .7, max: .7, type: 'raze' });
+}
+function step(u, x, z, dt) { const dx = x - u.x, dz = z - u.z, d = Math.hypot(dx, dz); if (d < .3) return true; const s = Math.min(d, u.spd * dt * (u.invisT > 0 ? 1.2 : 1)); u.x += dx / d * s; u.z += dz / d * s; u.face = Math.atan2(dz, dx); return false; }
+function atk(u, t) {
+  if (u.cd > 0) return; u.cd = u.as; u.face = Math.atan2(t.z - u.z, t.x - u.x); u.pulse = .12;
+  let d = u.dmg; if (u.invisT > 0) { d += 80; u.invisT = 0; }
+  if (u.rng > 4) beam(u, t, 0xff5555);
+  hit(t, d, u);
+}
+function hit(t, a, src) {
+  if (t.k === 'ward') { if (t.dead) return; if (--t.hp <= 0) { t.dead = true; D.sc.remove(t.mesh); if (src && src.k === 'hero') { src.gold += 50; if (src === D.me) toast('Вард уничтожен +50'); } } return; }
+  if (t.dead || t.cycT > 0) return; t.hp -= a; if (t.hp <= 0) kill(t, src); }
+function addXp(h, x) {
+  h.xp += x;
+  while (h.lv < 15 && h.xp >= h.lv * 90) { h.xp -= h.lv * 90; h.lv++; recalc(h); ring(h.x, h.z, 6, 0xffe066); if (h === D.me) toast('⬆️ Уровень ' + h.lv); }
+}
+function kill(t, src) {
+  t.dead = true; t.mesh.visible = false; t.castT = 0;
+  const near = D.units.filter(h => h.k === 'hero' && h.t !== t.t && !h.dead && dst(h, t) < 35);
+  if (t.k === 'creep') {
+    if (src && src.k === 'hero' && src.t !== t.t) { src.gold += 40; src.souls = Math.min(40, src.souls + 1); recalc(src); near.forEach(h => addXp(h, 60)); }
+    else if (src && src.t === t.t) { if (src === D.me) toast('Deny! 🚫'); }
+    else near.forEach(h => { addXp(h, 30); h.gold += 15; });
+    D.sc.remove(t.mesh);
+  } else if (t.k === 'tower') {
+    D.units.filter(h => h.k === 'hero' && h.t !== t.t).forEach(h => h.gold += 250); toast(t.t ? '🏰 Вражеская башня уничтожена! +250' : '🏰 Ваша башня пала');
+  } else {
+    t.deaths++; t.respT = 5 + t.lv; t.souls >>= 1; t.gold = Math.max(0, t.gold - 100); t.order = null; recalc(t); ring(t.x, t.z, 7, 0xff2222);
+    D.units.filter(h => h.k === 'hero' && h.t !== t.t).forEach(h => { h.gold += 200; addXp(h, 150); h.kills++; });
+    toast(t.t ? '💀 Бот погиб!' : '☠️ Вы погибли');
+    if (t.deaths >= 3 && D.run) dFinish(t.t === 1);
+  }
+}
+function dFinish(win) {
+  D.run = false; D.tgt = null; dTgtUi(); const rw = win ? DF[D.diff].rw : 30; addCoins(rw); stat('dota', win);
+  $('dOverT').textContent = (win ? '🏆 Победа! ' : '💀 Поражение. ') + '+' + rw + ' 🪙'; $('dOver').classList.remove('hidden'); if (win) confetti(['🪙', '⚔️', '✨'], 40);
+}
+function cast(h, i) {
+  if (h.dead || h.cycT > 0 || h.castT > 0 || h.cds[i] > 0 || !D.run) return false;
+  const cost = i < 3 ? 40 : 150; if (h.mana < cost || (i === 3 && h.lv < 6)) return false;
+  h.mana -= cost; h.cds[i] = i < 3 ? RAZE_CD : 40; h.invisT = 0; h.inv.forEach(x => { if (x.mx && x.ch < x.mx) x.ch++; });
+  if (i < 3) {
+    const px = h.x + Math.cos(h.face) * SK[i].d, pz = h.z + Math.sin(h.face) * SK[i].d; ring(px, pz, 3.2, 0xff2222); razeFx(px, pz);
+    D.units.forEach(e => { if (!e.dead && e.t !== h.t && e.cycT <= 0 && Math.hypot(e.x - px, e.z - pz) < 3.4) hit(e, (55 + h.lv * 12 + h.int * .5) * SK[i].k * (h.dm || 1), h); });
+  } else { h.castT = 2.5; h.order = null; h.cv = 0; ring(h.x, h.z, 6, 0xaa0000); }
+  return true;
+}
+function fireReq(u) { D.req.push({ x: u.x, z: u.z, t: u.t, src: u, R: REQ_R, life: 2, acc: 0, vt: 0, tot: 200 + u.souls * 6 + u.lv * 10, dm: u.dm || 1 }); }
+function buy(h, id) { const it = ITEMS[id]; if (UNIQ.includes(id) && h.inv.some(i => i.id === id)) return 'dup'; if (h.gold < it.c || h.inv.length >= 6) return false; h.gold -= it.c; h.inv.push({ id, ch: id === 'bottle' ? 3 : 0, mx: id === 'stick' ? 10 : id === 'wand' ? 15 : 0, cd: 0 }); recalc(h); return true; }
+function useItem(h, s, target) {
+  const it = h.inv[s]; if (!it || h.dead || h.cycT > 0 || h.castT > 0 || it.cd > 0 || !D.run) return false;
+  const rm = () => h.inv.splice(s, 1);
+  switch (it.id) {
+    case 'tango': h.hot = 20; h.hotT = 8; rm(); break;
+    case 'fairy': h.hp = Math.min(h.max, h.hp + 100); rm(); break;
+    case 'salve': h.hot = 40; h.hotT = 8; rm(); break;
+    case 'clarity': h.mot = 6; h.motT = 20; rm(); break;
+    case 'mango': h.mana = Math.min(h.mmax, h.mana + 110); rm(); break;
+    case 'branch': h.bonus++; rm(); recalc(h); break;
+    case 'bottle': if (!it.ch) return false; it.ch--; h.hot = 18; h.hotT = 3; h.mot = 10; h.motT = 3; break;
+    case 'stick': case 'wand': { const v = it.ch * 15; h.hp = Math.min(h.max, h.hp + v); h.mana = Math.min(h.mmax, h.mana + v); it.ch = 0; break; }
+    case 'ward': case 'sentry': {
+      const sen = it.id === 'sentry', rr = sen ? 14 : WRV, m = new THREE.Group(), o = MM(new THREE.SphereGeometry(.5, 10, 8), sen ? 0x4aa3ff : 0xffd54a, { emissive: sen ? 0x0a3a88 : 0x886600 }); o.position.y = .6; m.add(o);
+      const r = BM(new THREE.RingGeometry(rr - .4, rr, 40), sen ? 0x4aa3ff : 0xffd54a); r.material.opacity = .3; r.rotation.x = -Math.PI / 2; r.position.y = .1; if (h.t === 0) m.add(r);
+      m.position.set(h.x, gh(h.x), h.z); const w = { k: 'ward', type: it.id, t: h.t, x: h.x, z: h.z, r: rr, rv: rr, hp: 3, max: 3, dead: false, cycT: 0, life: 360, mesh: m }; m.userData.u = w; D.sc.add(m); D.wards.push(w); rm(); break; }
+    case 'grenade': { const px = h.x + Math.cos(h.face) * 9, pz = h.z + Math.sin(h.face) * 9; ring(px, pz, 8, 0xffb703); D.units.forEach(e => { if (!e.dead && e.t !== h.t && Math.hypot(e.x - px, e.z - pz) < 8) hit(e, 170, h); }); h.invisT = 0; rm(); break; }
+    case 'eul': {
+      let t = target;
+      if (!t) {
+        if (h === D.me) { D.tgt = s; dTgtUi(); toast("🌀 Eul's: выбери цель ЛКМ (ПКМ/Esc — отмена)"); return false; }
+        t = D.units.find(u => u.k === 'hero' && u.t !== h.t && !u.dead && dst(u, h) < 16 && seen(u, h.t)); if (!t) return false;
+        if (Math.random() < DF[D.diff].mis) { const cr = D.units.find(u => u.k === 'creep' && !u.dead && dst(u, h) < 16 && dst(u, t) < 6); if (cr) t = cr; }
+      }
+      t.cycT = 2.5; t.castT = 0; if (t.order) t.order = null; it.cd = 18; ring(t.x, t.z, 5, 0x7ad0ff); break; }
+    case 'sb': h.invisT = 10; it.cd = 25; break;
+  }
+  return true;
+}
+function plantTree(h, s) {
+  const it = h.inv[s]; if (!it || it.id !== 'branch' || !D.run) return; h.inv.splice(s, 1);
+  const t = new THREE.Group(); t.add(MM(new THREE.CylinderGeometry(.2, .3, 1.6, 6), 0x6b4423)); const l = MM(new THREE.ConeGeometry(1.2, 2.6, 8), 0x2e8b3d); l.position.y = 2; t.add(l);
+  t.position.set(h.x + Math.cos(h.face) * 2, .8, h.z + Math.sin(h.face) * 2); D.sc.add(t); D.trees.push(t); toast('🌳 Дерево посажено');
+}
+function ai(u, dt) {
+  if (u.k === 'tower') {
+    if (u.cd > 0) return;
+    const es = D.units.filter(e => !e.dead && e.k !== 'tower' && e.t !== u.t && e.cycT <= 0 && dst(e, u) < 15 && (e.k !== 'hero' || seen(e, u.t)));
+    const c = es.filter(e => e.k === 'creep'), pool = c.length ? c : es; let t = null, d = 99;
+    pool.forEach(e => { const q = dst(e, u); if (q < d) { d = q; t = e; } });
+    if (t) { u.cd = 1.3; beam(u, t, 0xffd166); hit(t, 55 + D.t * .05, u); } return;
+  }
+  u.ta -= dt;
+  if (u.ta <= 0) { u.ta = .3; let t = null, d = 9; D.units.forEach(e => { if (e.dead || e.t === u.t || e.cycT > 0 || (e.k === 'hero' && !seen(e, u.t))) return; const q = dst(e, u); if (q < d) { d = q; t = e; } }); u.tgt = t; }
+  if (u.tgt && !u.tgt.dead) { if (dst(u, u.tgt) > u.rng + (u.tgt.k === 'tower' ? 1.5 : 0)) step(u, u.tgt.x, u.tgt.z, dt); else atk(u, u.tgt); }
+  else { const tw = u.t ? D.tw0 : D.tw1; step(u, tw.dead ? (u.t ? -44 : 44) : tw.x, 0, dt); }
+}
+function heroUpd(h, dt) {
+  if (h.dead) { h.respT -= dt; if (h.respT <= 0 && D.run) { h.dead = false; h.x = h.t ? 40 : -40; h.z = 0; h.hp = h.max; h.mana = h.mmax; h.invisT = 0; h.cycT = 0; h.castT = 0; } return; }
+  h.hp = Math.min(h.max, h.hp + (.6 + h.str * .08 + h.hot) * dt); h.mana = Math.min(h.mmax, h.mana + (.5 + h.int * .06 + h.mot) * dt);
+  if (h.hotT > 0 && (h.hotT -= dt) <= 0) h.hot = 0; if (h.motT > 0 && (h.motT -= dt) <= 0) h.mot = 0; if (h.invisT > 0) h.invisT -= dt;
+  h.inv.forEach(i => { if (i.cd > 0) i.cd -= dt; });
+  if (Math.abs(h.x - (h.t ? 44 : -44)) < 6) { h.hp = Math.min(h.max, h.hp + h.max * .15 * dt); h.mana = Math.min(h.mmax, h.mana + h.mmax * .15 * dt); h.inv.forEach(i => { if (i.id === 'bottle') i.ch = 3; }); }
+  const o = h.order; if (!o) return;
+  if (o.type === 'move') { if (step(h, o.x, o.z, dt)) h.order = null; }
+  else { const t = o.t; if (!t || t.dead || (t.k === 'hero' && !seen(t, h.t))) h.order = null; else if (dst(h, t) > h.rng + (t.k === 'tower' ? 1.5 : 0)) step(h, t.x, t.z, dt); else atk(h, t); }
+}
+function botAI(b, dt) {
+  const P = DF[D.diff]; b.think -= dt; if (b.think > 0 || b.dead || b.cycT > 0 || b.castT > 0) return; b.think = P.th;
+  while (D.buy[b.bi] && b.gold >= ITEMS[D.buy[b.bi]].c && b.inv.length < 6) buy(b, D.buy[b.bi++]);
+  const p = D.me, sp = !p.dead && seen(p, 1), dp = dst(b, p), r = b.hp / b.max;
+  const has = id => b.inv.findIndex(i => i.id === id && !(i.cd > 0) && (id !== 'bottle' || i.ch > 0));
+  const use = id => { const s = has(id); return s >= 0 ? useItem(b, s) : false; };
+  const own = ty => D.wards.some(w => w.t === 1 && w.type === ty && !w.dead);
+  // закупка вардов
+  if (P.ward && !own('ward') && has('ward') < 0 && b.gold >= ITEMS.ward.c + 40 && b.inv.length < 6) buy(b, 'ward');
+  if (P.sen && !own('sentry') && has('sentry') < 0 && b.gold >= ITEMS.sentry.c + 40 && b.inv.length < 6 && (D.t > 120 || D.wards.some(w => w.t === 0 && !w.dead))) buy(b, 'sentry');
+  if (r < .55 && !b.hotT) { use('tango') || use('salve') || use('bottle') || use('fairy'); }
+  if (b.mana < b.mmax * .3) { use('mango') || use('clarity') || use('bottle'); }
+  const ws = b.inv.findIndex(i => (i.id === 'stick' || i.id === 'wand') && i.ch >= 6); if (ws >= 0 && r < .5) useItem(b, ws);
+  // ломает вражеские варды (видит их через свой Sentry)
+  const ew = D.wards.find(w => w.t === 0 && !w.dead && wardSeen(w, 1) && dst(w, b) < 32);
+  if (ew && r > .5 && !(sp && dp < 14)) { b.order = { type: 'atk', t: ew }; return; }
+  // ставит варды на точки
+  const need = has('ward') >= 0 && !own('ward') ? 'ward' : has('sentry') >= 0 && !own('sentry') ? 'sentry' : null;
+  if (need && r > .45 && !(sp && dp < 20)) {
+    if (!b.wg) b.wg = WSP[(Math.random() * WSP.length) | 0];
+    if (Math.hypot(b.x - b.wg[0], b.z - b.wg[1]) < 2.5) { use(need); b.wg = null; } else { b.order = { type: 'move', x: b.wg[0], z: b.wg[1] }; return; }
+  } else if (!need) b.wg = null;
+  if (r < .28 || (b.lv < 3 && r < .4 && sp && dp < 30)) { b.order = { type: 'move', x: 43, z: 0 }; return; }
+  if (sp && dp < 34 && r > .4) {
+    b.face = Math.atan2(p.z - b.z, p.x - b.x);
+    if (P.fancy && dp < 24 && dp > 8 && b.invisT <= 0) use('sb');
+    if (P.fancy && dp < 15 && p.cycT <= 0 && use('eul')) return;
+    for (let i = 0; i < 3; i++) if (Math.abs(dp - SK[i].d) < P.aim && cast(b, i)) return;
+    if (P.ult && b.lv >= 6 && dp < 9 && cast(b, 3)) return;
+    b.order = { type: 'atk', t: p }; return;
+  }
+  let t = null, sc = 1e9;
+  D.units.forEach(e => {
+    if (e.dead || e.k !== 'creep' || dst(e, b) > 26 || (!D.tw0.dead && dst(e, D.tw0) < 16)) return;
+    if (e.t !== b.t) { const s = (e.hp <= b.dmg ? 0 : 50) + dst(e, b); if (s < sc) { sc = s; t = e; } }
+    else if (e.hp < e.max * .5 && e.hp <= b.dmg && sc > -5) { sc = -5; t = e; }
+  });
+  b.order = t ? { type: 'atk', t } : { type: 'move', x: 16, z: (Math.random() - .5) * 8 };
+}
+function dTick(dt) {
+  D.t += dt; if (D.t >= D.wave * 18 + 2) { D.wave++; spawnWave(); }
+  D.units.slice().forEach(u => {
+    if (u.dead && u.k !== 'hero') return;
+    if (u.cd > 0) u.cd -= dt; if (u.pulse > 0) u.pulse -= dt;
+    if (u.k === 'hero') u.cds.forEach((c, i) => u.cds[i] = Math.max(0, c - dt));
+    if (u.cycT > 0 && !u.dead) { u.cycT -= dt; return; }
+    if (u.castT > 0 && !u.dead) { u.castT -= dt; u.cv = (u.cv || 0) - dt; if (u.cv <= 0) { u.cv = .25; ring(u.x, u.z, 5, 0xaa0000); } if (u.castT <= 0) fireReq(u); return; }
+    if (u.k === 'hero') { if (u === D.bot) botAI(u, dt); heroUpd(u, dt); } else ai(u, dt);
+  });
+  D.req = D.req.filter(z => {
+    z.life -= dt; z.acc += dt; z.vt -= dt;
+    while (z.acc >= .1) { z.acc -= .1; D.units.forEach(e => { if (e.dead || e.t === z.t || e.k === 'tower' || e.cycT > 0) return; const d = dst(e, z); if (d < z.R) hit(e, z.tot / 20 * z.dm * (1 - .7 * d / z.R), z.src); }); }
+    if (z.vt <= 0) { z.vt = .25; ring(z.x, z.z, z.R, 0xff1a1a); ring(z.x, z.z, z.R * .6, 0x990000); for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6 + z.life; beam({ x: z.x, z: z.z }, { x: z.x + Math.cos(a) * z.R, z: z.z + Math.sin(a) * z.R }, 0xff2200); } }
+    return z.life > 0;
+  });
+  D.units = D.units.filter(u => !u.dead || u.k !== 'creep');
+  D.wards = D.wards.filter(w => { w.life -= dt; if (w.life <= 0 || w.dead) { D.sc.remove(w.mesh); return false; } return true; });
+}
+function setOp(u, o) { if (u.op === o) return; u.op = o; u.mesh.traverse(c => { if (c.material) c.material.opacity = o; }); }
+function fogDraw() {
+  const g = D.fg, W = 480, H = 280; g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, W, H); g.fillStyle = 'rgba(3,5,12,.97)'; g.fillRect(0, 0, W, H); g.globalCompositeOperation = 'destination-out';
+  const hole = (x, z, r) => { const px = (x + 120) * 2, py = (z + 70) * 2, R = r * 2, gr = g.createRadialGradient(px, py, R * .72, px, py, R); gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.beginPath(); g.arc(px, py, R, 0, 6.3); g.fill(); };
+  D.units.forEach(u => { if (!u.dead && u.t === 0) hole(u.x, u.z, VIS[u.k]); });
+  D.wards.forEach(w => { if (!w.dead && w.t === 0 && w.type === 'ward') hole(w.x, w.z, w.rv); });
+  if (D.me.dead) hole(D.me.x, D.me.z, 16);
+  D.ft.needsUpdate = true;
+}
+function dSync(dt) {
+  D.units.forEach(u => {
+    let y = gh(u.x);
+    if (u.cycT > 0) { y = gh(u.x) + 3 * Math.sin(Math.PI * Math.min(1, (2.5 - u.cycT) / 2.5)); u.body.rotation.y += .3; }
+    u.mesh.position.set(u.x, y, u.z); u.mesh.scale.setScalar(1 + Math.max(0, u.pulse) * 1.4 + (u.castT > 0 ? .12 * Math.sin(D.clock.elapsedTime * 22) : 0));
+    u.mesh.visible = !u.dead && (u.t === 0 || seen(u, 0));
+    if (u.k === 'hero') setOp(u, u.invisT > 0 ? .35 : 1);
+    const r = Math.max(0, u.hp / u.max); u.bar.fg.scale.x = r || .001; u.bar.fg.position.x = -(1 - r) * u.bar.w / 2; u.bar.quaternion.copy(D.cam.quaternion);
+  });
+  D.fx = D.fx.filter(f => {
+    f.life -= dt; const k = Math.max(0, f.life / f.max);
+    if (f.type === 'ring') { const s = f.r * (1 - k) + .2; f.m.scale.set(s, s, 1); f.m.material.opacity = k * .7; }
+    else if (f.type === 'raze') { f.m.children.forEach((c, i) => { c.material.opacity = k; if (i > 1) { const s = Math.min(1, (1 - k) * 5); c.scale.y = Math.max(.01, s); c.position.y = c.userData.h * s / 2; } }); }
+    else if (f.type === 'arrow') { f.m.position.y = f.y0 + Math.abs(Math.sin((1 - k) * 9)) * .5; f.m.children.forEach(c => c.material.opacity = k); }
+    else f.m.material.opacity = k * .7;
+    if (f.life <= 0) { D.sc.remove(f.m); return false; } return true;
+  });
+  D.wards.forEach(w => w.mesh.visible = !w.dead && (w.t === 0 || wardSeen(w, 0)));
+  const now = D.clock.elapsedTime; D.flames.forEach((f, i) => { f.scale.y = 1 + .3 * Math.sin(now * 11 + i * 2); if (f.userData.L) f.userData.L.intensity = .8 + .25 * Math.sin(now * 13 + i); });
+  // камера: мышь у края экрана
+  if (D.run && D.mx >= 0) { const E = 22, dx = D.mx < E ? -1 : D.mx > D.vw - E ? 1 : 0, dz = D.my < E ? -1 : D.my > D.vh - E ? 1 : 0; D.cx += dx * 48 * dt; D.cz += dz * 48 * dt; }
+  D.cx = Math.max(-58, Math.min(58, D.cx)); D.cz = Math.max(-24, Math.min(24, D.cz));
+  const gy = gh(D.cx); D.cam.position.set(D.cx, 34 + gy, D.cz + 24); D.cam.lookAt(D.cx, gy, D.cz);
+  fogDraw();
+  if ((D.hu -= dt) <= 0) { D.hu = .1; hud(); }
+}
+function hud() {
+  const m = D.me, b = D.bot;
+  $('dHpB').style.width = m.hp / m.max * 100 + '%'; $('dMpB').style.width = m.mana / m.mmax * 100 + '%';
+  $('dHpT').textContent = Math.ceil(m.hp) + ' / ' + m.max; $('dMpT').textContent = Math.ceil(m.mana) + ' / ' + m.mmax;
+  $('dHpR').textContent = '+' + (.6 + m.str * .08 + m.hot).toFixed(1); $('dMpR').textContent = '+' + (.5 + m.int * .06 + m.mot).toFixed(1);
+  $('dLv').textContent = m.lv; $('dSt').innerHTML = `⚔ ${m.dmg}<br>👻 ${m.souls}<br>xp ${m.xp}/${m.lv * 90}`; $('dGold').textContent = '🪙 ' + m.gold;
+  $('dScore').textContent = `Смерти — вы: ${m.deaths}/3 · бот: ${b.deaths}/3 · ⏱ ${Math.floor(D.t / 60)}:${String(Math.floor(D.t % 60)).padStart(2, '0')} · ${DF[D.diff].n}`;
+  document.querySelectorAll('.ab').forEach((el, i) => { const c = Math.ceil(m.cds[i]), lk = i === 3 && m.lv < 6; el.dataset.cd = lk ? '🔒' : c > 0 ? c : ''; el.classList.toggle('off', lk || c > 0 || m.mana < (i < 3 ? 40 : 150)); el.classList.toggle('lock', lk); });
+  document.querySelectorAll('.sl').forEach((el, i) => { const it = m.inv[i], ie = el.querySelector('.ie'); ie.textContent = it ? ITEMS[it.id].e + (it.mx || it.id === 'bottle' ? ' ' + it.ch : '') : ''; el.title = it ? ITEMS[it.id].n : ''; el.classList.toggle('off', !!it && it.cd > 0); });
+  $('dDead').classList.toggle('hidden', !m.dead); if (m.dead) $('dDead').textContent = 'Вы погибли… возрождение через ' + Math.ceil(m.respT) + ' с';
+}
+function dLoop() {
+  requestAnimationFrame(dLoop); if (D.paused || !D.me) return;
+  const dt = Math.min(D.clock.getDelta(), .05); if (D.run) dTick(dt); dSync(dt); D.r.render(D.sc, D.cam);
+}
+
+/* ---------- шахматы ---------- */
+bets.chess = 50; chips('chChips', 'chess');
+const CG = { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' }, CV = { P: 100, N: 320, B: 330, R: 500, Q: 900, K: 20000 };
+const KN = [[1, 2], [2, 1], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]], OR = [[1, 0], [-1, 0], [0, 1], [0, -1]], DG = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+let cb = [], cOn = false, cSel = -1, cMoves = [], cStake = 0, cPly = 0, cTurn = 'w';
+function cInit() { const r = 'RNBQKBNR'; cb = Array(64).fill(''); for (let i = 0; i < 8; i++) { cb[i] = 'b' + r[i]; cb[8 + i] = 'bP'; cb[48 + i] = 'wP'; cb[56 + i] = 'w' + r[i]; } cSel = -1; cMoves = []; }
+function cGen(b, s) {
+  const out = [];
+  for (let i = 0; i < 64; i++) {
+    const p = b[i]; if (!p || p[0] !== s) continue; const t = p[1], r = i >> 3, c = i & 7;
+    const add = (r2, c2) => { if (r2 < 0 || r2 > 7 || c2 < 0 || c2 > 7) return false; const q = b[r2 * 8 + c2]; if (q && q[0] === s) return false; out.push([i, r2 * 8 + c2]); return !q; };
+    if (t === 'P') {
+      const d = s === 'w' ? -1 : 1, st = s === 'w' ? 6 : 1;
+      if (!b[(r + d) * 8 + c]) { out.push([i, (r + d) * 8 + c]); if (r === st && !b[(r + 2 * d) * 8 + c]) out.push([i, (r + 2 * d) * 8 + c]); }
+      for (const dc of [-1, 1]) { const c2 = c + dc, q = b[(r + d) * 8 + c2]; if (c2 >= 0 && c2 < 8 && q && q[0] !== s) out.push([i, (r + d) * 8 + c2]); }
+    } else if (t === 'N') KN.forEach(([a, d]) => add(r + a, c + d));
+    else if (t === 'K') [...OR, ...DG].forEach(([a, d]) => add(r + a, c + d));
+    else (t === 'R' ? OR : t === 'B' ? DG : [...OR, ...DG]).forEach(([a, d]) => { let k = 1; while (add(r + a * k, c + d * k)) k++; });
+  }
+  return out;
+}
+function cMv(b, m) { const n = b.slice(); let p = n[m[0]]; if (p[1] === 'P' && ((m[1] >> 3) === 0 || (m[1] >> 3) === 7)) p = p[0] + 'Q'; n[m[1]] = p; n[m[0]] = ''; return n; }
+const cOpp = s => s === 'w' ? 'b' : 'w';
+function cIn(b, s) { const k = b.indexOf(s + 'K'); return k < 0 || cGen(b, cOpp(s)).some(m => m[1] === k); }
+const cLegal = (b, s) => cGen(b, s).filter(m => !cIn(cMv(b, m), s));
+function cEv(b) {
+  let v = 0;
+  for (let i = 0; i < 64; i++) { const p = b[i]; if (!p) continue; const t = p[1], r = i >> 3, c = i & 7; let x = CV[t];
+    if (t === 'N' || t === 'B' || t === 'P') x += (7 - Math.abs(r - 3.5) - Math.abs(c - 3.5)) * 4;
+    if (t === 'P') x += (p[0] === 'w' ? 6 - r : r - 1) * 6;
+    v += p[0] === 'w' ? x : -x; }
+  return v;
+}
+function cNm(b, s, d, a, bt) {
+  if (!d) return (s === 'w' ? 1 : -1) * cEv(b);
+  let best = -1e9; const val = m => b[m[1]] ? CV[b[m[1]][1]] : 0;
+  for (const m of cGen(b, s).sort((x, y) => val(y) - val(x))) {
+    if (b[m[1]] && b[m[1]][1] === 'K') return 1e5 + d;
+    const sc = -cNm(cMv(b, m), cOpp(s), d - 1, -bt, -a);
+    if (sc > best) best = sc; if (best > a) a = best; if (a >= bt) break;
+  }
+  return best === -1e9 ? 0 : best;
+}
+function cDraw() {
+  $('chBoard').innerHTML = cb.map((p, i) => `<button class="sq ${((i >> 3) + (i & 7)) % 2 ? 'd' : 'l'} ${i === cSel ? 'sel' : ''} ${cMoves.some(m => m[1] === i) ? 'tg' : ''}" data-i="${i}">${p ? `<span class="p${p[0]}">${CG[p[1]]}</span>` : ''}</button>`).join('');
+}
+function cFinish(k) {
+  if (!cOn) return; cOn = false; lock.chess = false;
+  const pay = k === 'win' ? cStake * 2 : k === 'draw' ? cStake : 0;
+  if (pay) addCoins(pay); stat('chess', k === 'win', pay - cStake);
+  $('chMsg').textContent = k === 'win' ? '🏆 Победа! +' + cStake + ' 🪙' : k === 'draw' ? '🤝 Ничья, ставка возвращена' : '😔 Поражение, ставка потеряна';
+  if (k === 'win') confetti(['🪙', '♛', '✨'], 35);
+  $('chBetBar').classList.remove('hidden'); $('chRes').classList.add('hidden'); $('chLv').disabled = false;
+}
+function cCheck(s) {
+  if (!cLegal(cb, s).length) { cFinish(cIn(cb, s) ? (s === 'b' ? 'win' : 'lose') : 'draw'); return true; }
+  if (cPly > 160) { cFinish('draw'); return true; }
+  $('chMsg').textContent = cIn(cb, s) ? (s === 'w' ? '⚠️ Вам шах!' : '⚠️ Шах боту!') : (s === 'w' ? 'Ваш ход' : 'Бот думает…');
+  return false;
+}
+function cBot() {
+  if (!cOn) return; const lv = +$('chLv').value, ms = cLegal(cb, 'b'); let pick = ms[0];
+  if (lv === 1) pick = ms[(Math.random() * ms.length) | 0];
+  else if (lv === 2) { let bs = -1e9; ms.forEach(m => { const s = (cb[m[1]] ? CV[cb[m[1]][1]] : 0) + Math.random() * 40; if (s > bs) { bs = s; pick = m; } }); }
+  else { let bs = -1e9; ms.forEach(m => { const s = -cNm(cMv(cb, m), 'w', lv === 3 ? 1 : 2, -1e9, 1e9) + Math.random() * 3; if (s > bs) { bs = s; pick = m; } }); }
+  cb = cMv(cb, pick); cPly++; cTurn = 'w'; cDraw(); cCheck('w');
+}
+$('chBoard').onclick = e => {
+  const b = e.target.closest('[data-i]'); if (!b || !cOn || cTurn !== 'w') return; const i = +b.dataset.i, m = cMoves.find(x => x[1] === i);
+  if (cSel >= 0 && m) { cb = cMv(cb, m); cSel = -1; cMoves = []; cPly++; cTurn = 'b'; cDraw(); if (!cCheck('b')) setTimeout(cBot, 400); return; }
+  if (cb[i] && cb[i][0] === 'w') { cSel = i; cMoves = cLegal(cb, 'w').filter(x => x[0] === i); } else { cSel = -1; cMoves = []; }
+  cDraw();
+};
+$('chStart').onclick = () => {
+  if (cOn) return; const bet = bets.chess; if (coins() < bet) return toast('Не хватает монет');
+  addCoins(-bet); cStake = bet; lock.chess = true; cOn = true; cPly = 0; cTurn = 'w'; cInit(); cDraw();
+  $('chMsg').textContent = 'Ваш ход (белые)'; $('chBetBar').classList.add('hidden'); $('chRes').classList.remove('hidden'); $('chLv').disabled = true;
+};
+$('chResign').onclick = () => cFinish('lose');
+$('openChess').onclick = () => { view('chess'); if (!cOn) { cInit(); cDraw(); } };
+
+/* автовход, если сессия сохранена */
+const s = localStorage.getItem(SES);
+if (s) start(s);
+</script>
+</body>
+</html>
